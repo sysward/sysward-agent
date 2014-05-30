@@ -1,0 +1,80 @@
+package main
+
+import (
+  "os/exec"
+  "strings"
+  "os"
+  "fmt"
+  "runtime"
+  "net"
+  "io/ioutil"
+)
+
+func getSystemUID() string {
+  uid, err := ioutil.ReadFile("/sys/class/dmi/id/product_uuid")
+  if err != nil { panic(err) }
+  return strings.TrimSpace(string(uid))
+}
+
+func checkPreReqs() {
+
+  if _, err := os.Stat("/usr/lib/update-notifier/apt-check"); os.IsNotExist(err) {
+    fmt.Println("update notified not found, installing")
+    out, err := exec.Command("apt-get", "install", "update-notifier", "-y").Output()
+    if err != nil { panic(err) }
+    fmt.Println(string(out))
+  }
+
+}
+
+func verifyRoot() {
+  // cant use user.Current() because we're cross compiling and no cgo
+  usr, err := exec.Command("whoami").Output()
+  if err != nil {
+    panic(err)
+  }
+
+  if strings.TrimSpace(string(usr)) != "root" {
+    panic("patchasaurus client must be run as root.")
+  }
+}
+
+func getOsInformation() OperatingSystem {
+  out, err := exec.Command("lsb_release", "-d").Output()
+  if err != nil { panic(err) }
+  output := strings.Split(strings.TrimSpace(string(out)), ":")
+  tmp := strings.Split(strings.TrimSpace(output[1]), " ")
+  hostname, err := os.Hostname()
+
+  cpu_information := CPUInformation{getCPUName(), runtime.NumCPU()}
+  memory_information := MemoryInformation{getTotalMemory()}
+  return OperatingSystem{ tmp[0], getSystemUID(), tmp[1], getInterfaceInformation(), hostname, cpu_information, memory_information}
+}
+
+func getTotalMemory() string {
+  out,_ := exec.Command("grep", "MemTotal", "/proc/meminfo").Output()
+  t := strings.Split(string(out), ":")
+  x := strings.TrimSpace(t[1])
+  return x
+}
+
+func getCPUName() string {
+  out,_ := exec.Command("grep", "name", "/proc/cpuinfo").Output()
+  t := strings.Split(string(out), ":")
+  return strings.TrimSpace(t[1])
+}
+
+func getInterfaceInformation() []Interface {
+  interface_list , _ := net.Interfaces()
+
+  iflist := make([]Interface, len(interface_list))
+  for index, ifdev := range interface_list {
+    ips, _ := ifdev.Addrs()
+    ip_list := make([]string, len(ips))
+    for c, ip := range ips {
+      ip_list[c] = ip.String()
+    }
+    iflist[index] = Interface{ifdev.Name, ip_list, ifdev.HardwareAddr.String()}
+  }
+  return iflist
+}
