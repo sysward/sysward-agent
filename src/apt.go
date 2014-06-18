@@ -60,7 +60,7 @@ func buildInstalledPackageList() []string {
 }
 
 func buildPackageList() []OsPackage {
-	out, err := exec.Command("python", "trex.py").Output()
+	out, err := runner.Run("python", "trex.py")
 	if err != nil {
 		panic(err)
 	}

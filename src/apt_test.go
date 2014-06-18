@@ -1,9 +1,38 @@
 package main
 
 import (
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
+	"os"
+	"os/exec"
 	"testing"
 )
+
+type TestRunner struct{}
+
+func (r TestRunner) Run(command string, args ...string) ([]byte, error) {
+	cs := []string{"-test.run=TestHelperProcess", "--"}
+	cs = append(cs, args...)
+	cmd := exec.Command(os.Args[0], cs...)
+	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+	out, err := cmd.CombinedOutput()
+	return out, err
+}
+
+func TestPackagesThatNeedUpdates(t *testing.T) {
+	runner = TestRunner{}
+	Convey("Given pending updates", t, func() {
+
+		Convey("There should be a list of packages available for update", func() {
+			out, _ := runner.Run("echo", "hello")
+			fmt.Println(string(out))
+		})
+
+		Convey("There should be a list of security packages for update", nil)
+
+	})
+
+}
 
 func TestPackageUpdates(t *testing.T) {
 
@@ -53,18 +82,6 @@ func TestInstalledPackages(t *testing.T) {
 
 }
 
-func TestPackagesThatNeedUpdates(t *testing.T) {
-
-	Convey("Given pending updates", t, func() {
-
-		Convey("There should be a list of packages available for update", nil)
-
-		Convey("There should be a list of security packages for update", nil)
-
-	})
-
-}
-
 func TestUpdatingThePackageList(t *testing.T) {
 
 	Convey("Given I want to have the latest source list", t, func() {
@@ -89,4 +106,12 @@ func TestUpdateCounts(t *testing.T) {
 
 	})
 
+}
+
+func TestHelperProcess(*testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+	defer os.Exit(0)
+	fmt.Println("testing helper process")
 }
