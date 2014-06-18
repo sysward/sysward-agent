@@ -1,11 +1,10 @@
 package main
 
-import(
-  "strings"
+import (
+	"strings"
 )
 
 func stripPkgOutput(s string) string {
-  r := strings.NewReplacer("(", "", ")", "")
-  return r.Replace(s)
+	r := strings.NewReplacer("(", "", ")", "")
+	return r.Replace(s)
 }
-

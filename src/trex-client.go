@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+type Runner interface {
+	Run(string, ...string) ([]byte, error)
+}
+
 func logMsg(msg string) {
 	pc, _, _, _ := runtime.Caller(1)
 	caller := runtime.FuncForPC(pc).Name()
@@ -21,8 +25,14 @@ func logMsg(msg string) {
 }
 
 var config *Config
+var runner Runner
 
 func main() {
+	runner = SyswardRunner{}
+
+	out, err := runner.Run("echo", "hello")
+	fmt.Println(string(out))
+
 	verifyRoot()
 	logMsg("root verified")
 
