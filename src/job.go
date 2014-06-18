@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,14 +16,25 @@ type Job struct {
 }
 
 func (job *Job) run() {
+	var err error
+
 	if job.JobType == "upgrade-package" {
 		logMsg(fmt.Sprintf("[apt] upgrading: %s", job.PackageName))
-		err := updatePackage(job.PackageName)
-		if err != nil {
-			panic(err)
-		}
+		err = updatePackage(job.PackageName)
+	} else if job.JobType == "hold-package" {
+		err = holdPackage(job.PackageName)
+	} else if job.JobType == "unhold-package" {
+		err = unholdPackage(job.PackageName)
+	} else {
+		err = errors.New(fmt.Sprintf("[job] Unknown job type: %s", job.JobType))
 	}
-	job.postBack()
+
+	if err != nil {
+		logMsg(err.Error())
+	} else {
+		logMsg(fmt.Sprintf("[job] Posting back for job: ", job.JobId))
+		job.postBack()
+	}
 }
 
 func (job *Job) postBack() {
@@ -55,21 +67,34 @@ func runAllJobs(jobs []Job) {
 }
 
 func getJobs(config *Config) []Job {
+	var jobs []Job
 	job_url := config.fetchJobUrl(getSystemUID())
 
 	jreq, err := http.Get(job_url)
 
+	if err != nil {
+		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
+		return jobs
+	}
+
 	j, err := ioutil.ReadAll(jreq.Body)
+
+	if err != nil {
+		logMsg(fmt.Sprintf("Error reading jobs: %s", err))
+		return jobs
+	}
+
 	jreq.Body.Close()
 
 	logMsg(string(j))
 
-	var jobs []Job
-
-	err = json.Unmarshal(j, &jobs)
-	if err != nil {
-		panic(err)
+	if string(j) == "{}" {
+		return jobs
+	} else {
+		err = json.Unmarshal(j, &jobs)
+		if err != nil {
+			panic(err)
+		}
 	}
-
 	return jobs
 }

@@ -4,12 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 	"time"
 )
 
 func logMsg(msg string) {
-	fmt.Println("[", time.Now(), "] - ", msg)
+	pc, _, _, _ := runtime.Caller(1)
+	caller := runtime.FuncForPC(pc).Name()
+	_, file, line, _ := runtime.Caller(0)
+	sp := strings.Split(file, "/")
+	short_path := sp[len(sp)-2 : len(sp)]
+	path_line := fmt.Sprintf("[%s/%s:%d]", short_path[0], short_path[1], line)
+	log_string := fmt.Sprintf("[%s]%s{%s}:: %s", time.Now(), path_line, caller, msg)
+	fmt.Println(log_string)
 }
 
 var config *Config
@@ -39,8 +47,6 @@ func main() {
 
 		jobs := getJobs(config)
 
-		fmt.Println(jobs)
-
 		runAllJobs(jobs)
 
 		logMsg("checking jobs - finish")
@@ -54,11 +60,14 @@ func main() {
 		sources := getSourcesList()
 		logMsg("building sources list - finish")
 
+		installed_packages := buildInstalledPackageList()
+
 		logMsg("building json - start")
-		json_output := PatchasaurusOut{packages, counts, operating_system, sources}
+		json_output := PatchasaurusOut{packages, counts, operating_system, sources, installed_packages}
 		o, err := json.Marshal(json_output)
 		if err != nil {
-			panic(err)
+			logMsg(fmt.Sprintf("[fatal] %s", err))
+			continue
 		}
 		logMsg("building json - finish")
 
@@ -68,11 +77,13 @@ func main() {
 		// formatted_output, _ := json.MarshalIndent(json_output, "", "\t")
 		// fmt.Println(string(formatted_output))
 		if err != nil {
-			panic(err)
+			logMsg(fmt.Sprintf("[fatal] %s", err))
+			continue
 		}
 		str, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			logMsg(fmt.Sprintf("[fatal] %s", err))
+			continue
 		}
 		logMsg(string(str.Status))
 		logMsg("posting to api - finish")
