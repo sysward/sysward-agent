@@ -13,13 +13,30 @@ type Config struct {
 	ApiKey   string `json:"api_key"`
 }
 
-func NewConfig(filepath string) *Config {
-	var err error
-	config := new(Config)
-	file, err := ioutil.ReadFile(filepath)
+type ConfigReader interface {
+	ReadFile(string) []byte
+}
+
+type SyswardConfig struct{}
+
+func (c SyswardConfig) ReadFile(path string) []byte {
+	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
+	return file
+}
+
+var syswardConfig ConfigReader
+
+func NewConfig(filepath string) *Config {
+	var err error
+	config := new(Config)
+	if syswardConfig == nil {
+		syswardConfig = SyswardConfig{}
+	}
+	file := syswardConfig.ReadFile(filepath)
+
 	// config_json := string(file)
 	err = json.Unmarshal(file, &config)
 	if err != nil {

@@ -3,32 +3,31 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
 )
 
 func updatePackage(pkg string) error {
-	out, err := exec.Command("apt-get", "install", "-y", pkg).CombinedOutput()
+	out, err := runner.Run("apt-get", "install", "-y", pkg)
 	logMsg(string(out))
 	return err
 }
 
 func holdPackage(pkg string) error {
-	out, err := exec.Command("apt-mark", "hold", pkg).CombinedOutput()
+	out, err := runner.Run("apt-mark", "hold", pkg)
 	logMsg(string(out))
 	return err
 }
 
 func unholdPackage(pkg string) error {
-	out, err := exec.Command("apt-mark", "unhold", pkg).CombinedOutput()
+	out, err := runner.Run("apt-mark", "unhold", pkg)
 	logMsg(string(out))
 	return err
 }
 
 func getSourcesList() []Source {
-	out, _ := exec.Command("grep", "-h", "^deb", "/etc/apt/sources.list", "/etc/apt/sources.list.d/*").Output()
+	out, _ := runner.Run("grep", "-h", "^deb", "/etc/apt/sources.list", "/etc/apt/sources.list.d/*")
 	out_arr := strings.Split(strings.TrimSpace(string(out)), "\n")
 	sources := make([]Source, len(out_arr))
 	for index, o := range out_arr {
@@ -49,12 +48,15 @@ func getChangelog(package_name string) string {
 }
 
 func buildInstalledPackageList() []string {
-	installed, _ := exec.Command("dpkg", "--get-selections").Output()
+	installed, _ := runner.Run("dpkg", "--get-selections")
 	installed_arr := strings.Split(string(installed), "\n")
-	packages := make([]string, len(installed_arr))
-	for index, line := range installed_arr {
+	packages := []string{}
+	for _, line := range installed_arr {
 		x := strings.Split(line, "\u0009")
-		packages[index] = x[0]
+		if x[0] == "" {
+			continue
+		}
+		packages = append(packages, x[0])
 	}
 	return packages
 }
@@ -74,16 +76,13 @@ func buildPackageList() []OsPackage {
 	return packages
 }
 
-func updatePackageLists() {
-	out, err := exec.Command("apt-get", "update").Output()
-	if err != nil {
-		fmt.Println(string(out))
-		panic(err)
-	}
+func updatePackageLists() error {
+	_, err := runner.Run("apt-get", "update")
+	return err
 }
 
 func updateCounts() Updates {
-	out, err := exec.Command("/usr/lib/update-notifier/apt-check").CombinedOutput()
+	out, err := runner.Run("/usr/lib/update-notifier/apt-check")
 	if err != nil {
 		panic(err)
 	}
