@@ -30,16 +30,18 @@ func checkPreReqs() {
 
 }
 
-func verifyRoot() {
+func verifyRoot() string {
 	// cant use user.Current() because we're cross compiling and no cgo
-	usr, err := exec.Command("whoami").Output()
+	usr, err := runner.Run("whoami")
 	if err != nil {
 		panic(err)
 	}
 
-	if strings.TrimSpace(string(usr)) != "root" {
+	user := strings.TrimSpace(string(usr))
+	if user != "root" {
 		panic("patchasaurus client must be run as root.")
 	}
+	return user
 }
 
 func getOsInformation() OperatingSystem {

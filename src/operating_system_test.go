@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"os"
+
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -57,7 +60,17 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 	Convey("Given I don't have sudo access", t, nil)
 
-	Convey("Given I am root", t, nil)
+	Convey("Given I need to be root", t, func() {
+
+		Convey("I am root", func() {
+
+		})
+
+		Convey("I am not root", func() {
+
+		})
+
+	})
 
 	Convey("Give I am not root and don't have sudo access", t, nil)
 
@@ -119,4 +132,39 @@ func TestInterfaceInformation(t *testing.T) {
 
 	})
 
+}
+
+func TestHelperProcess(*testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+	cmd := os.Args[3]
+	defer os.Exit(0)
+
+	if cmd == "python" && os.Args[4] == "trex.py" {
+		fmt.Println(`[{"name": "apt", "section": "admin", "priority": "important", "current_version": "1.0.1ubuntu2", "security": true, "candidate_version": "1.0.1ubuntu2.1"}]`)
+	} else if cmd == "apt-get" && os.Args[4] == "install" {
+		if os.Args[6] == "apt-held" {
+			os.Exit(-1)
+		}
+	} else if cmd == "apt-mark" {
+		// nothing
+
+	} else if cmd == "apt-get" && os.Args[4] == "update" {
+		// nothing
+	} else if cmd == "grep" && os.Args[4] == "-h" {
+		src := `deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted
+deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main restricted`
+		fmt.Println(src)
+	} else if cmd == "dpkg" && os.Args[4] == "--get-selections" {
+		fmt.Println("apt\u0009install")
+	} else if cmd == "/usr/lib/update-notifier/apt-check" {
+		fmt.Println("1;2")
+	} else {
+		fmt.Println(os.Args)
+		for index, arg := range os.Args {
+			fmt.Println(fmt.Sprintf("arg[%d]: %s", index, string(arg)))
+		}
+		os.Exit(-1)
+	}
 }

@@ -1,2 +1,2 @@
 #!/bin/bash
-gxc -target="linux/amd64" build -o trex ./src
+gxc -target="linux/amd64" build -o trex .
