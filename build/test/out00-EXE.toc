@@ -1,0 +1,9 @@
+('/Users/joshrendek/development/sysward-agent/dist/test',
+ True,
+ False,
+ None,
+ None,
+ [],
+ None,
+ False,
+ 1404223394)

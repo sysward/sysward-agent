@@ -1,6 +1,0 @@
-{
-  "host": "10.0.2.2:5000",
-  "protocol": "http",
-  "interval": "15s",
-  "api_key": "d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a"
-}
