@@ -57,9 +57,15 @@ func TestURLBuilding(t *testing.T) {
 			_url := config.fetchJobPostbackUrl()
 			u, _ := url.Parse(_url)
 			So(u.Path, ShouldEqual, "/api/v1/postback")
+			So(u.RawQuery, ShouldEqual, "api_key=d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
 		})
 
-		Convey("agentCheckinUrl should be a valid URL", nil)
+		Convey("agentCheckinUrl should be a valid URL", func() {
+			_url := config.agentCheckinUrl()
+			u, _ := url.Parse(_url)
+			So(u.Path, ShouldEqual, "/api/v1/agent")
+			So(u.RawQuery, ShouldEqual, "api_key=d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+		})
 
 	})
 

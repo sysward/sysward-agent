@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
-	"runtime"
+	"os"
 	"strings"
 	"time"
 )
@@ -13,22 +15,28 @@ type Runner interface {
 	Run(string, ...string) ([]byte, error)
 }
 
+type SystemFileReader interface {
+	ReadFile(string) ([]byte, error)
+}
+
+type SyswardFileReader struct{}
+
+func (r SyswardFileReader) ReadFile(path string) ([]byte, error) {
+	return ioutil.ReadFile("../config.json")
+}
+
 func logMsg(msg string) {
-	pc, _, _, _ := runtime.Caller(1)
-	caller := runtime.FuncForPC(pc).Name()
-	_, file, line, _ := runtime.Caller(0)
-	sp := strings.Split(file, "/")
-	short_path := sp[len(sp)-2 : len(sp)]
-	path_line := fmt.Sprintf("[%s/%s:%d]", short_path[0], short_path[1], line)
-	log_string := fmt.Sprintf("[%s]%s{%s}:: %s", time.Now(), path_line, caller, msg)
-	fmt.Println(log_string)
+	logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	logfile.Println(msg)
 }
 
 var config *Config
 var runner Runner
+var file_reader SystemFileReader
 
 func main() {
 	runner = SyswardRunner{}
+	file_reader = SyswardFileReader{}
 
 	out, err := runner.Run("echo", "hello")
 	fmt.Println(string(out))
