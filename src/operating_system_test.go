@@ -2,11 +2,9 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"os"
-
 	"testing"
 
+	"code.google.com/p/gomock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -56,6 +54,12 @@ func TestPrereqs(t *testing.T) {
 
 func TestPrivilegeEscalation(t *testing.T) {
 
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	runner := NewMockRunner(mockCtrl)
+	runner.EXPECT().Run("whoami").Return([]byte("root"), nil)
+	verifyRoot()
+
 	Convey("Given I have sudo acccess", t, nil)
 
 	Convey("Given I don't have sudo access", t, nil)
@@ -63,7 +67,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 	Convey("Given I need to be root", t, func() {
 
 		Convey("I am root", func() {
-
+			//So(user, ShouldEqual, "root")
 		})
 
 		Convey("I am not root", func() {
@@ -134,37 +138,38 @@ func TestInterfaceInformation(t *testing.T) {
 
 }
 
-func TestHelperProcess(*testing.T) {
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	cmd := os.Args[3]
-	defer os.Exit(0)
+type MockRunner struct {
+	ctrl     *gomock.Controller
+	recorder *_MockRunnerRecorder
+}
 
-	if cmd == "python" && os.Args[4] == "trex.py" {
-		fmt.Println(`[{"name": "apt", "section": "admin", "priority": "important", "current_version": "1.0.1ubuntu2", "security": true, "candidate_version": "1.0.1ubuntu2.1"}]`)
-	} else if cmd == "apt-get" && os.Args[4] == "install" {
-		if os.Args[6] == "apt-held" {
-			os.Exit(-1)
-		}
-	} else if cmd == "apt-mark" {
-		// nothing
+// Recorder for MockRunner (not exported)
+type _MockRunnerRecorder struct {
+	mock *MockRunner
+}
 
-	} else if cmd == "apt-get" && os.Args[4] == "update" {
-		// nothing
-	} else if cmd == "grep" && os.Args[4] == "-h" {
-		src := `deb http://us.archive.ubuntu.com/ubuntu/ trusty main restricted
-deb-src http://us.archive.ubuntu.com/ubuntu/ trusty main restricted`
-		fmt.Println(src)
-	} else if cmd == "dpkg" && os.Args[4] == "--get-selections" {
-		fmt.Println("apt\u0009install")
-	} else if cmd == "/usr/lib/update-notifier/apt-check" {
-		fmt.Println("1;2")
-	} else {
-		fmt.Println(os.Args)
-		for index, arg := range os.Args {
-			fmt.Println(fmt.Sprintf("arg[%d]: %s", index, string(arg)))
-		}
-		os.Exit(-1)
+func NewMockRunner(ctrl *gomock.Controller) *MockRunner {
+	mock := &MockRunner{ctrl: ctrl}
+	mock.recorder = &_MockRunnerRecorder{mock}
+	return mock
+}
+
+func (_m *MockRunner) EXPECT() *_MockRunnerRecorder {
+	return _m.recorder
+}
+
+func (_m *MockRunner) Run(_param0 string, _param1 ...string) ([]byte, error) {
+	_s := []interface{}{_param0}
+	for _, _x := range _param1 {
+		_s = append(_s, _x)
 	}
+	ret := _m.ctrl.Call(_m, "Run", _s...)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockRunnerRecorder) Run(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	_s := append([]interface{}{arg0}, arg1...)
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Run", _s...)
 }

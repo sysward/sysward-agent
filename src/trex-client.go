@@ -11,10 +11,6 @@ import (
 	"time"
 )
 
-type Runner interface {
-	Run(string, ...string) ([]byte, error)
-}
-
 type SystemFileReader interface {
 	ReadFile(string) ([]byte, error)
 }

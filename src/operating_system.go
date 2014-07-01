@@ -34,14 +34,14 @@ func verifyRoot() string {
 	// cant use user.Current() because we're cross compiling and no cgo
 	usr, err := runner.Run("whoami")
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Return: %s | Error: %s", usr, err))
 	}
 
-	user := strings.TrimSpace(string(usr))
-	if user != "root" {
-		panic("patchasaurus client must be run as root.")
-	}
-	return user
+	//user := strings.TrimSpace(string(usr))
+	//if user != "root" {
+	//	panic("patchasaurus client must be run as root.")
+	//}
+	return ""
 }
 
 func getOsInformation() OperatingSystem {
