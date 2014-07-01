@@ -1,15 +1,43 @@
 package main
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
+	"errors"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
+type TestReader struct{}
+type TestErrorReader struct{}
+
+func (r TestReader) ReadFile(path string) ([]byte, error) {
+	if path == "/sys/class/dmi/id/product_uuid" {
+		return []byte("UUID"), nil
+	}
+	return nil, nil
+}
+
+func (r TestErrorReader) ReadFile(path string) ([]byte, error) {
+	if path == "/sys/class/dmi/id/product_uuid" {
+		return nil, errors.New("fail")
+	}
+	return nil, nil
+}
+
 func TestSystemUid(t *testing.T) {
-
 	Convey("Given /sys/class/dmi/id/product_uuid exists", t, func() {
+		file_reader = TestReader{}
+		Convey("Then I should get a UID", func() {
+			uid := getSystemUID()
+			So(uid, ShouldEqual, "UUID")
+		})
 
-		Convey("Then I should get a UID", nil)
+	})
+	Convey("Given /sys/class/dmi/id/product_uuid doesnt exist", t, func() {
+		file_reader = TestErrorReader{}
+		Convey("Then I should panic", func() {
+			So(func() { getSystemUID() }, ShouldPanic)
+		})
 
 	})
 

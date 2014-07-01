@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -11,7 +10,7 @@ import (
 )
 
 func getSystemUID() string {
-	uid, err := ioutil.ReadFile("/sys/class/dmi/id/product_uuid")
+	uid, err := file_reader.ReadFile("/sys/class/dmi/id/product_uuid")
 	if err != nil {
 		panic(err)
 	}

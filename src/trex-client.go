@@ -22,7 +22,7 @@ type SystemFileReader interface {
 type SyswardFileReader struct{}
 
 func (r SyswardFileReader) ReadFile(path string) ([]byte, error) {
-	return ioutil.ReadFile("../config.json")
+	return ioutil.ReadFile(path)
 }
 
 func logMsg(msg string) {
