@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 )
@@ -44,11 +43,11 @@ func verifyRoot() string {
 }
 
 func getOsInformation() OperatingSystem {
-	out, err := exec.Command("lsb_release", "-d").Output()
+	out, err := runner.Run("lsb_release", "-d")
 	if err != nil {
 		panic(err)
 	}
-	output := strings.Split(strings.TrimSpace(string(out)), ":")
+	output := strings.Split(strings.TrimSpace(out), ":")
 	tmp := strings.Split(strings.TrimSpace(output[1]), " ")
 	hostname, err := os.Hostname()
 
@@ -58,15 +57,15 @@ func getOsInformation() OperatingSystem {
 }
 
 func getTotalMemory() string {
-	out, _ := exec.Command("grep", "MemTotal", "/proc/meminfo").Output()
-	t := strings.Split(string(out), ":")
+	out, _ := runner.Run("grep", "MemTotal", "/proc/meminfo")
+	t := strings.Split(out, ":")
 	x := strings.TrimSpace(t[1])
 	return x
 }
 
 func getCPUName() string {
-	out, _ := exec.Command("grep", "name", "/proc/cpuinfo").Output()
-	t := strings.Split(string(out), ":")
+	out, _ := runner.Run("grep", "name", "/proc/cpuinfo")
+	t := strings.Split(out, ":")
 	return strings.TrimSpace(t[1])
 }
 

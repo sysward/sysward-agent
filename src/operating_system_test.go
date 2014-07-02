@@ -67,6 +67,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 			r.On("Run", "whoami", []string{}).Return("root", nil)
 			runner = r
 			So(verifyRoot(), ShouldEqual, "root")
+			r.Mock.AssertExpectations(t)
 		})
 
 		Convey("I am not root", func() {
@@ -74,6 +75,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 			r.On("Run", "whoami", []string{}).Return("notroot", nil)
 			runner = r
 			So(func() { verifyRoot() }, ShouldPanic)
+			r.Mock.AssertExpectations(t)
 		})
 
 	})
@@ -84,35 +86,72 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 func TestOSInformation(t *testing.T) {
 
+	r := new(MockRunner)
+	r.On("Run", "lsb_release", []string{"-d"}).Return("Description:    Ubuntu 14.04 LTS", nil)
+	r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
+	r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
+	runner = r
+
+	f := new(MockReader)
+	f.On("ReadFile", "/sys/class/dmi/id/product_uuid").Return([]byte("UUID"), nil)
+	file_reader = f
+
+	os := getOsInformation()
 	Convey("Given I run lsb_release -a", t, func() {
 
-		Convey("It should have an OS name", nil)
+		Convey("It should have an OS name", func() {
+			So(os.Name, ShouldEqual, "Ubuntu")
+		})
 
-		Convey("It should have a UID", nil)
+		Convey("It should have a UID", func() {
+			So(os.UID, ShouldEqual, "UUID")
+		})
 
-		Convey("It should have an OS version", nil)
+		Convey("It should have an OS version", func() {
+			So(os.Version, ShouldEqual, "14.04")
+		})
 
-		Convey("It should have network interfaces", nil)
+		Convey("It should have network interfaces", func() {
+		})
 
-		Convey("It should have a hostname", nil)
+		Convey("It should have a hostname", func() {
+			So(os.Hostname, ShouldNotBeNil)
+		})
 
-		Convey("It should have CPU information", nil)
+		Convey("It should have CPU information", func() {
+			So(os.CPUInformation.Name, ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
+		})
 
-		Convey("It should have Memory information", nil)
+		Convey("It should have Memory information", func() {
+			So(os.MemoryInformation.Total, ShouldEqual, "1017764 kB")
+		})
 
 	})
 
+	r.Mock.AssertExpectations(t)
+	f.Mock.AssertExpectations(t)
 }
 
 func TestMemory(t *testing.T) {
 
-	Convey("It should give me total memory", t, nil)
+	Convey("It should give me total memory", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
+		runner = r
+		So(getTotalMemory(), ShouldEqual, "1017764 kB")
+		r.Mock.AssertExpectations(t)
+	})
 
 }
 
 func TestCPUInformation(t *testing.T) {
 
-	Convey("It should give me the CPU name", t, nil)
+	Convey("It should give me the CPU name", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
+		runner = r
+		So(getCPUName(), ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
+	})
 
 }
 
