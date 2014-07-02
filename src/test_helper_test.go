@@ -13,3 +13,12 @@ func (r *MockRunner) Run(command string, args ...string) (string, error) {
 	_args := r.Mock.Called(command, pa)
 	return _args.String(0), _args.Error(1)
 }
+
+type MockReader struct {
+	mock.Mock
+}
+
+func (r *MockReader) ReadFile(path string) ([]byte, error) {
+	args := r.Mock.Called(path)
+	return args.Get(0).([]byte), args.Error(1)
+}

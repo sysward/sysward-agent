@@ -11,6 +11,7 @@ import (
 
 func getSystemUID() string {
 	uid, err := file_reader.ReadFile("/sys/class/dmi/id/product_uuid")
+	fmt.Println(uid)
 	if err != nil {
 		panic(err)
 	}
