@@ -25,6 +25,16 @@ func TestPackagesThatNeedUpdates(t *testing.T) {
 
 }
 
+func TestChangeLog(t *testing.T) {
+	Convey("Changelong gets 64bit encoded", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "apt-get", []string{"changelog", "apt"}).Return("foobar", nil)
+		runner = r
+		So(getChangelog("apt"), ShouldEqual, "Zm9vYmFy")
+		r.Mock.AssertExpectations(t)
+	})
+}
+
 func TestPackageUpdates(t *testing.T) {
 	Convey("Given a package name", t, func() {
 

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -42,8 +41,8 @@ func getSourcesList() []Source {
 }
 
 func getChangelog(package_name string) string {
-	changelog, _ := exec.Command("apt-get", "changelog", package_name).Output()
-	changelog_encoded := base64.StdEncoding.EncodeToString(changelog)
+	changelog, _ := runner.Run("apt-get", "changelog", package_name)
+	changelog_encoded := base64.StdEncoding.EncodeToString([]byte(changelog))
 	return changelog_encoded
 }
 
