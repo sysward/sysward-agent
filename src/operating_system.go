@@ -19,16 +19,14 @@ func getSystemUID() string {
 }
 
 func checkPreReqs() {
-
-	if _, err := os.Stat("/usr/lib/update-notifier/apt-check"); os.IsNotExist(err) {
+	if !file_reader.FileExists("/usr/lib/update-notifier/apt-check") {
 		fmt.Println("update notifier not found, installing")
-		out, err := exec.Command("apt-get", "install", "update-notifier", "-y").Output()
+		out, err := runner.Run("apt-get", "install", "update-notifier", "-y")
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(out))
+		logMsg(out)
 	}
-
 }
 
 func verifyRoot() string {

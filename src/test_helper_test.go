@@ -22,3 +22,8 @@ func (r *MockReader) ReadFile(path string) ([]byte, error) {
 	args := r.Mock.Called(path)
 	return args.Get(0).([]byte), args.Error(1)
 }
+
+func (r *MockReader) FileExists(path string) bool {
+	args := r.Mock.Called(path)
+	return args.Bool(0)
+}

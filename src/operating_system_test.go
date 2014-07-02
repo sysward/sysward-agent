@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -19,7 +20,11 @@ func TestSystemUid(t *testing.T) {
 	})
 	Convey("Given /sys/class/dmi/id/product_uuid doesnt exist", t, func() {
 		Convey("Then I should panic", func() {
-			//So(func() { getSystemUID() }, ShouldPanic)
+			r := new(MockReader)
+			r.On("ReadFile", "/sys/class/dmi/id/product_uuid").Return([]byte{}, errors.New("fail"))
+			file_reader = r
+			So(func() { getSystemUID() }, ShouldPanic)
+			r.Mock.AssertExpectations(t)
 		})
 
 	})
@@ -28,9 +33,25 @@ func TestSystemUid(t *testing.T) {
 
 func TestPrereqs(t *testing.T) {
 
-	Convey("Given pre-req's are installed", t, nil)
+	Convey("Given pre-req's are installed", t, func() {
+		f := new(MockReader)
+		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
+		file_reader = f
+		So(func() { checkPreReqs() }, ShouldNotPanic)
+		f.Mock.AssertExpectations(t)
+	})
 
-	Convey("Given pre-req's aren't installed", t, nil)
+	Convey("Given pre-req's aren't installed", t, func() {
+		r := new(MockRunner)
+		f := new(MockReader)
+		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
+		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
+		file_reader = f
+		runner = r
+		checkPreReqs()
+		f.Mock.AssertExpectations(t)
+		r.Mock.AssertExpectations(t)
+	})
 
 }
 
