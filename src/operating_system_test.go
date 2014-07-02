@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"code.google.com/p/gomock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -53,13 +52,6 @@ func TestPrereqs(t *testing.T) {
 }
 
 func TestPrivilegeEscalation(t *testing.T) {
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	runner := NewMockRunner(mockCtrl)
-	runner.EXPECT().Run("whoami").Return([]byte("root"), nil)
-	verifyRoot()
-
 	Convey("Given I have sudo acccess", t, nil)
 
 	Convey("Given I don't have sudo access", t, nil)
@@ -67,11 +59,17 @@ func TestPrivilegeEscalation(t *testing.T) {
 	Convey("Given I need to be root", t, func() {
 
 		Convey("I am root", func() {
-			//So(user, ShouldEqual, "root")
+			r := new(MockRunner)
+			r.On("Run", "whoami", []string{}).Return("root", nil)
+			runner = r
+			So(verifyRoot(), ShouldEqual, "root")
 		})
 
 		Convey("I am not root", func() {
-
+			r := new(MockRunner)
+			r.On("Run", "whoami", []string{}).Return("notroot", nil)
+			runner = r
+			So(func() { verifyRoot() }, ShouldPanic)
 		})
 
 	})
@@ -136,40 +134,4 @@ func TestInterfaceInformation(t *testing.T) {
 
 	})
 
-}
-
-type MockRunner struct {
-	ctrl     *gomock.Controller
-	recorder *_MockRunnerRecorder
-}
-
-// Recorder for MockRunner (not exported)
-type _MockRunnerRecorder struct {
-	mock *MockRunner
-}
-
-func NewMockRunner(ctrl *gomock.Controller) *MockRunner {
-	mock := &MockRunner{ctrl: ctrl}
-	mock.recorder = &_MockRunnerRecorder{mock}
-	return mock
-}
-
-func (_m *MockRunner) EXPECT() *_MockRunnerRecorder {
-	return _m.recorder
-}
-
-func (_m *MockRunner) Run(_param0 string, _param1 ...string) ([]byte, error) {
-	_s := []interface{}{_param0}
-	for _, _x := range _param1 {
-		_s = append(_s, _x)
-	}
-	ret := _m.ctrl.Call(_m, "Run", _s...)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockRunnerRecorder) Run(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	_s := append([]interface{}{arg0}, arg1...)
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Run", _s...)
 }

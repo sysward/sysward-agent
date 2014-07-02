@@ -5,12 +5,12 @@ import (
 )
 
 type Runner interface {
-	Run(string, ...string) ([]byte, error)
+	Run(string, ...string) (string, error)
 }
 
 type SyswardRunner struct{}
 
-func (r SyswardRunner) Run(command string, args ...string) ([]byte, error) {
+func (r SyswardRunner) Run(command string, args ...string) (string, error) {
 	out, err := exec.Command(command, args...).CombinedOutput()
-	return out, err
+	return string(out), err
 }

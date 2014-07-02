@@ -1,54 +1,48 @@
 package main
 
-//import . "github.com/smartystreets/goconvey/convey"
+import (
+	"fmt"
+	"testing"
 
-//type TestRunner struct{}
-//
-//func (r TestRunner) Run(command string, args ...string) ([]byte, error) {
-//	cs := []string{"-test.run=TestHelperProcess", "--"}
-//	cs = append(cs, command)
-//	cs = append(cs, args...)
-//	cmd := exec.Command(os.Args[0], cs...)
-//	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
-//	out, err := cmd.CombinedOutput()
-//	return out, err
-//}
-//
-//func Setup() {
-//	runner = TestRunner{}
-//}
-//
-//func TestPackagesThatNeedUpdates(t *testing.T) {
-//	Setup()
-//	Convey("Given pending updates", t, func() {
-//
-//		Convey("There should be a list of packages available for update", func() {
-//			osPackages := buildPackageList()
-//			So(osPackages[0].Name, ShouldEqual, "apt")
-//			So(osPackages[0].Security, ShouldEqual, true)
-//		})
-//	})
-//
-//}
-//
-//func TestPackageUpdates(t *testing.T) {
-//	Setup()
-//	Convey("Given a package name", t, func() {
-//
-//		Convey("The package should be upgraded", func() {
-//			err := updatePackage("apt")
-//			So(err, ShouldBeNil)
-//		})
-//
-//		Convey("The package should not upgrade if held", func() {
-//			err := updatePackage("apt-held")
-//			fmt.Println(err)
-//			So(err, ShouldNotBeNil)
-//		})
-//	})
-//
-//}
-//
+	. "github.com/smartystreets/goconvey/convey"
+)
+
+func TestPackagesThatNeedUpdates(t *testing.T) {
+	Convey("Given pending updates", t, func() {
+
+		Convey("There should be a list of packages available for update", func() {
+			mockValue := `[{"name": "apt", "section": "admin", "priority": "important", "current_version": "1.0.1ubuntu2", "security": true, "candidate_version": "1.0.1ubuntu2.1"}]`
+			r := new(MockRunner)
+			r.On("Run", "python", []string{"trex.py"}).Return(mockValue, nil)
+			runner = r
+			osPackages := buildPackageList()
+			So(osPackages[0].Name, ShouldEqual, "apt")
+			So(osPackages[0].Security, ShouldEqual, true)
+		})
+	})
+
+}
+
+func TestPackageUpdates(t *testing.T) {
+	Convey("Given a package name", t, func() {
+
+		Convey("The package should be upgraded", func() {
+			r := new(MockRunner)
+			r.On("Run", "apt-get", []string{"install", "-y", "apt"}).Return("", nil)
+			runner = r
+			err := updatePackage("apt")
+			So(err, ShouldBeNil)
+		})
+
+		Convey("The package should not upgrade if held", func() {
+			err := updatePackage("apt-held")
+			fmt.Println(err)
+			So(err, ShouldNotBeNil)
+		})
+	})
+
+}
+
 //func TestPackageHolding(t *testing.T) {
 //	Setup()
 //	Convey("Given holding a package", t, func() {

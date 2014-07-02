@@ -68,7 +68,7 @@ func buildPackageList() []OsPackage {
 	}
 	var packages []OsPackage
 
-	err = json.Unmarshal(out, &packages)
+	err = json.Unmarshal([]byte(out), &packages)
 	if err != nil {
 		panic(err)
 	}

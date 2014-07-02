@@ -37,11 +37,11 @@ func verifyRoot() string {
 		panic(fmt.Sprintf("Return: %s | Error: %s", usr, err))
 	}
 
-	//user := strings.TrimSpace(string(usr))
-	//if user != "root" {
-	//	panic("patchasaurus client must be run as root.")
-	//}
-	return ""
+	user := strings.TrimSpace(string(usr))
+	if user != "root" {
+		panic("patchasaurus client must be run as root.")
+	}
+	return user
 }
 
 func getOsInformation() OperatingSystem {
