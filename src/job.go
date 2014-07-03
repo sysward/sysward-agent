@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 type Job struct {
@@ -20,11 +19,11 @@ func (job *Job) run() {
 
 	if job.JobType == "upgrade-package" {
 		logMsg(fmt.Sprintf("[apt] upgrading: %s", job.PackageName))
-		err = updatePackage(job.PackageName)
+		err = package_manager.UpdatePackage(job.PackageName)
 	} else if job.JobType == "hold-package" {
-		err = holdPackage(job.PackageName)
+		err = package_manager.HoldPackage(job.PackageName)
 	} else if job.JobType == "unhold-package" {
-		err = unholdPackage(job.PackageName)
+		err = package_manager.UnholdPackage(job.PackageName)
 	} else {
 		err = errors.New(fmt.Sprintf("[job] Unknown job type: %s", job.JobType))
 	}
@@ -32,30 +31,8 @@ func (job *Job) run() {
 	if err != nil {
 		logMsg(err.Error())
 	} else {
-		logMsg(fmt.Sprintf("[job] Posting back for job: ", job.JobId))
-		job.postBack()
-	}
-}
-
-func (job *Job) postBack() {
-	client := &http.Client{}
-	data := struct {
-		JobId  int    `json:"job_id"`
-		Status string `json:"status"`
-	}{
-		job.JobId,
-		"success",
-	}
-	o, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-	post_data := strings.NewReader(string(o))
-	req, err := http.NewRequest("POST", config.fetchJobPostbackUrl(), post_data)
-	req.Header.Add("X-Sysward-Uid", getSystemUID())
-	_, err = client.Do(req)
-	if err != nil {
-		panic(err)
+		logMsg(fmt.Sprintf("[job] Posting back for job: %d", job.JobId))
+		api.JobPostBack(*job)
 	}
 }
 

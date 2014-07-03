@@ -7,25 +7,27 @@ import (
 	"strings"
 )
 
-func updatePackage(pkg string) error {
+type DebianPackageManager struct{}
+
+func (pm DebianPackageManager) UpdatePackage(pkg string) error {
 	out, err := runner.Run("apt-get", "install", "-y", pkg)
 	logMsg(string(out))
 	return err
 }
 
-func holdPackage(pkg string) error {
+func (pm DebianPackageManager) HoldPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "hold", pkg)
 	logMsg(string(out))
 	return err
 }
 
-func unholdPackage(pkg string) error {
+func (pm DebianPackageManager) UnholdPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "unhold", pkg)
 	logMsg(string(out))
 	return err
 }
 
-func getSourcesList() []Source {
+func (pm DebianPackageManager) GetSourcesList() []Source {
 	out, _ := runner.Run("grep", "-h", "^deb", "/etc/apt/sources.list", "/etc/apt/sources.list.d/*")
 	out_arr := strings.Split(strings.TrimSpace(string(out)), "\n")
 	sources := make([]Source, len(out_arr))
@@ -40,13 +42,13 @@ func getSourcesList() []Source {
 	return sources
 }
 
-func getChangelog(package_name string) string {
+func (pm DebianPackageManager) GetChangelog(package_name string) string {
 	changelog, _ := runner.Run("apt-get", "changelog", package_name)
 	changelog_encoded := base64.StdEncoding.EncodeToString([]byte(changelog))
 	return changelog_encoded
 }
 
-func buildInstalledPackageList() []string {
+func (pm DebianPackageManager) BuildInstalledPackageList() []string {
 	installed, _ := runner.Run("dpkg", "--get-selections")
 	installed_arr := strings.Split(string(installed), "\n")
 	packages := []string{}
@@ -60,7 +62,7 @@ func buildInstalledPackageList() []string {
 	return packages
 }
 
-func buildPackageList() []OsPackage {
+func (pm DebianPackageManager) BuildPackageList() []OsPackage {
 	out, err := runner.Run("python", "trex.py")
 	if err != nil {
 		panic(err)
@@ -75,12 +77,12 @@ func buildPackageList() []OsPackage {
 	return packages
 }
 
-func updatePackageLists() error {
+func (pm DebianPackageManager) UpdatePackageLists() error {
 	_, err := runner.Run("apt-get", "update")
 	return err
 }
 
-func updateCounts() Updates {
+func (pm DebianPackageManager) UpdateCounts() Updates {
 	out, err := runner.Run("/usr/lib/update-notifier/apt-check")
 	if err != nil {
 		panic(err)

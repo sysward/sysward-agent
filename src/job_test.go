@@ -1,15 +1,32 @@
 package main
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestRunningAJob(t *testing.T) {
 
 	Convey("Given a 'upgrade-package' job", t, func() {
 
-		Convey("The package should be upgraded", nil)
+		Convey("The package should be upgraded", func() {
+			pm := new(MockPackageManager)
+			a := new(MockSyswardApi)
+			pm.On("UpdatePackage", "apt").Return(nil)
+			job := Job{
+				JobId:       1,
+				JobType:     "upgrade-package",
+				PackageName: "apt",
+			}
+
+			a.On("JobPostBack", job).Return()
+			package_manager = pm
+			api = a
+			job.run()
+			pm.Mock.AssertExpectations(t)
+			a.Mock.AssertExpectations(t)
+		})
 
 	})
 

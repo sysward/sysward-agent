@@ -27,3 +27,61 @@ func (r *MockReader) FileExists(path string) bool {
 	args := r.Mock.Called(path)
 	return args.Bool(0)
 }
+
+type MockPackageManager struct {
+	mock.Mock
+}
+
+func (r MockPackageManager) UpdatePackage(name string) error {
+	args := r.Mock.Called(name)
+	return args.Error(0)
+}
+
+func (r MockPackageManager) HoldPackage(name string) error {
+	args := r.Mock.Called(name)
+	return args.Error(0)
+}
+
+func (r MockPackageManager) UnholdPackage(name string) error {
+	args := r.Mock.Called(name)
+	return args.Error(0)
+}
+
+func (r MockPackageManager) BuildPackageList() []OsPackage {
+	args := r.Mock.Called()
+	return args.Get(0).([]OsPackage)
+}
+
+func (r MockPackageManager) GetSourcesList() []Source {
+	args := r.Mock.Called()
+	return args.Get(0).([]Source)
+}
+
+func (r MockPackageManager) GetChangelog(name string) string {
+	args := r.Mock.Called(name)
+	return args.String(0)
+}
+
+func (r MockPackageManager) BuildInstalledPackageList() []string {
+	args := r.Mock.Called()
+	return args.Get(0).([]string)
+}
+
+func (r MockPackageManager) UpdatePackageLists() error {
+	args := r.Mock.Called()
+	return args.Error(0)
+}
+
+func (r MockPackageManager) UpdateCounts() Updates {
+	args := r.Mock.Called()
+	return args.Get(0).(Updates)
+}
+
+type MockSyswardApi struct {
+	mock.Mock
+}
+
+func (r MockSyswardApi) JobPostBack(job Job) {
+	r.Mock.Called(job)
+	return
+}
