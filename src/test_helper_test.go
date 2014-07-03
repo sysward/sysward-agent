@@ -90,6 +90,11 @@ func (r *MockSyswardApi) JobPostBack(job Job) {
 	return
 }
 
+func (r *MockSyswardApi) CheckIn(agentData AgentData) error {
+	args := r.Mock.Called(agentData)
+	return args.Error(0)
+}
+
 func (r *MockSyswardApi) GetJobs() string {
 	args := r.Mock.Called()
 	return args.String(0)

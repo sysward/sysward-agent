@@ -17,7 +17,7 @@ func (r SyswardFileReader) ReadFile(path string) ([]byte, error) {
 }
 
 func (r SyswardFileReader) FileExists(path string) bool {
-	if _, err := os.Stat("/usr/lib/update-notifier/apt-check"); os.IsNotExist(err) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
 	}
 	return true

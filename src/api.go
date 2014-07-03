@@ -11,9 +11,39 @@ import (
 type WebApi interface {
 	JobPostBack(Job)
 	GetJobs() string
+	CheckIn(AgentData) error
 }
 
 type SyswardApi struct{}
+
+func (r SyswardApi) CheckIn(agentData AgentData) error {
+	client := &http.Client{}
+	logMsg("building json - start")
+	o, err := agentData.ToJson()
+	if err != nil {
+		logMsg(fmt.Sprintf("[fatal] %s", err))
+		return nil
+	}
+	logMsg("building json - finish")
+
+	logMsg("posting to api - start")
+	post_data := strings.NewReader(o)
+	req, err := http.NewRequest("POST", config.agentCheckinUrl(), post_data)
+	// formatted_output, _ := json.MarshalIndent(json_output, "", "\t")
+	// fmt.Println(string(formatted_output))
+	if err != nil {
+		logMsg(fmt.Sprintf("[fatal] %s", err))
+		return nil
+	}
+	str, err := client.Do(req)
+	if err != nil {
+		logMsg(fmt.Sprintf("[fatal] %s", err))
+		return nil
+	}
+	logMsg(string(str.Status))
+	logMsg("posting to api - finish")
+	return nil
+}
 
 func (r SyswardApi) GetJobs() string {
 	job_url := config.fetchJobUrl(getSystemUID())

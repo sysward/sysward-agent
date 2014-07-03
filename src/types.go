@@ -1,13 +1,5 @@
 package main
 
-type PatchasaurusOut struct {
-	Packages          []OsPackage     `json:"packages"`
-	SystemUpdates     Updates         `json:"system_updates"`
-	OperatingSystem   OperatingSystem `json:"operating_system"`
-	Sources           []Source        `json:"sources"`
-	InstalledPackages []string        `json:"installed_packages"`
-}
-
 type Interface struct {
 	Name string   `json:"name"`
 	Ips  []string `json:"ips"`

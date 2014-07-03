@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -45,12 +42,9 @@ func (a *Agent) Startup() {
 
 func (a *Agent) Run() {
 	for {
-
 		logMsg("package list update - start")
 		package_manager.UpdatePackageLists()
 		logMsg("package list update - finish")
-
-		client := &http.Client{}
 
 		logMsg("checking jobs - start")
 
@@ -62,43 +56,24 @@ func (a *Agent) Run() {
 
 		counts := package_manager.UpdateCounts()
 		operating_system := getOsInformation()
-		logMsg("building package list - start")
 		packages := package_manager.BuildPackageList()
-		logMsg("building package list - finish")
-		logMsg("building sources list - start")
 		sources := package_manager.GetSourcesList()
-		logMsg("building sources list - finish")
 
 		installed_packages := package_manager.BuildInstalledPackageList()
 
-		logMsg("building json - start")
-		json_output := PatchasaurusOut{packages, counts, operating_system, sources, installed_packages}
-		o, err := json.Marshal(json_output)
+		agentData := AgentData{
+			Packages:          packages,
+			SystemUpdates:     counts,
+			OperatingSystem:   operating_system,
+			Sources:           sources,
+			InstalledPackages: installed_packages,
+		}
+		err := api.CheckIn(agentData)
 		if err != nil {
 			logMsg(fmt.Sprintf("[fatal] %s", err))
-			continue
+			break
 		}
-		logMsg("building json - finish")
-
-		logMsg("posting to api - start")
-		post_data := strings.NewReader(string(o))
-		req, err := http.NewRequest("POST", config.agentCheckinUrl(), post_data)
-		// formatted_output, _ := json.MarshalIndent(json_output, "", "\t")
-		// fmt.Println(string(formatted_output))
-		if err != nil {
-			logMsg(fmt.Sprintf("[fatal] %s", err))
-			continue
-		}
-		str, err := client.Do(req)
-		if err != nil {
-			logMsg(fmt.Sprintf("[fatal] %s", err))
-			continue
-		}
-		logMsg(string(str.Status))
-		logMsg("posting to api - finish")
-
 		//time.Sleep(interval)
-
 	}
 }
 
