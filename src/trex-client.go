@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,90 +10,32 @@ import (
 	"time"
 )
 
-type SystemFileReader interface {
-	ReadFile(string) ([]byte, error)
-	FileExists(string) bool
-}
-
-type WebApi interface {
-	JobPostBack(Job)
-	GetJobs() string
-}
-
-type SystemPackageManager interface {
-	UpdatePackage(string) error
-	HoldPackage(string) error
-	UnholdPackage(string) error
-	BuildPackageList() []OsPackage
-	GetSourcesList() []Source
-	GetChangelog(string) string
-	BuildInstalledPackageList() []string
-	UpdatePackageLists() error
-	UpdateCounts() Updates
-}
-
-type SyswardFileReader struct{}
-
-type SyswardApi struct{}
-
-func (r SyswardFileReader) ReadFile(path string) ([]byte, error) {
-	return ioutil.ReadFile(path)
-}
-
-func (r SyswardFileReader) FileExists(path string) bool {
-	if _, err := os.Stat("/usr/lib/update-notifier/apt-check"); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
-
-func (r SyswardApi) GetJobs() string {
-	job_url := config.fetchJobUrl(getSystemUID())
-
-	jreq, err := http.Get(job_url)
-
-	if err != nil {
-		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
-		return ""
-	}
-
-	j, err := ioutil.ReadAll(jreq.Body)
-
-	if err != nil {
-		logMsg(fmt.Sprintf("Error reading jobs: %s", err))
-		return ""
-	}
-
-	jreq.Body.Close()
-
-	return string(j)
-}
-
-func (r SyswardApi) JobPostBack(job Job) {
-	client := &http.Client{}
-	data := struct {
-		JobId  int    `json:"job_id"`
-		Status string `json:"status"`
-	}{
-		job.JobId,
-		"success",
-	}
-	o, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-	post_data := strings.NewReader(string(o))
-	req, err := http.NewRequest("POST", config.fetchJobPostbackUrl(), post_data)
-	req.Header.Add("X-Sysward-Uid", getSystemUID())
-	_, err = client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func logMsg(msg string) {
 	logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	logfile.Println(msg)
+}
+
+type Agent struct {
+	runner         Runner
+	fileReader     SystemFileReader
+	packageManager SystemPackageManager
+	api            WebApi
+}
+
+func NewAgent() *Agent {
+	agent := Agent{
+		runner:         SyswardRunner{},
+		fileReader:     SyswardFileReader{},
+		packageManager: DebianPackageManager{},
+		api:            SyswardApi{},
+	}
+	return &agent
+}
+
+func (a *Agent) Startup() {
+	verifyRoot()
+	checkPreReqs()
+	logMsg("pre-reqs verified")
 }
 
 var config *Config
@@ -104,19 +45,13 @@ var package_manager SystemPackageManager
 var api WebApi
 
 func main() {
-	runner = SyswardRunner{}
-	file_reader = SyswardFileReader{}
-	package_manager = DebianPackageManager{}
-	api = SyswardApi{}
+	agent := NewAgent()
+	runner = agent.runner
+	file_reader = agent.fileReader
+	package_manager = agent.packageManager
+	api = agent.api
 
-	out, err := runner.Run("echo", "hello")
-	fmt.Println(string(out))
-
-	verifyRoot()
-	logMsg("root verified")
-
-	checkPreReqs()
-	logMsg("pre-reqs verified")
+	agent.Startup()
 
 	config = NewConfig("config.json")
 	interval, err := time.ParseDuration(config.Interval)

@@ -2,6 +2,7 @@ package main
 
 import "github.com/stretchr/testify/mock"
 
+/* Mocked calls for running system commands */
 type MockRunner struct {
 	mock.Mock
 }
@@ -14,6 +15,7 @@ func (r *MockRunner) Run(command string, args ...string) (string, error) {
 	return _args.String(0), _args.Error(1)
 }
 
+/* Mocked calls for reading files and checking if files exist */
 type MockReader struct {
 	mock.Mock
 }
@@ -28,6 +30,7 @@ func (r *MockReader) FileExists(path string) bool {
 	return args.Bool(0)
 }
 
+/* Mock package manager calls */
 type MockPackageManager struct {
 	mock.Mock
 }
@@ -77,6 +80,7 @@ func (r *MockPackageManager) UpdateCounts() Updates {
 	return args.Get(0).(Updates)
 }
 
+/* Mock WebAPI calls */
 type MockSyswardApi struct {
 	mock.Mock
 }

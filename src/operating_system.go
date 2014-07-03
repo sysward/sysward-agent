@@ -39,6 +39,7 @@ func verifyRoot() string {
 	if user != "root" {
 		panic("patchasaurus client must be run as root.")
 	}
+	logMsg("root verified")
 	return user
 }
 
