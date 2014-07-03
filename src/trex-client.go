@@ -18,6 +18,7 @@ type SystemFileReader interface {
 
 type WebApi interface {
 	JobPostBack(Job)
+	GetJobs() string
 }
 
 type SystemPackageManager interface {
@@ -45,6 +46,28 @@ func (r SyswardFileReader) FileExists(path string) bool {
 		return false
 	}
 	return true
+}
+
+func (r SyswardApi) GetJobs() string {
+	job_url := config.fetchJobUrl(getSystemUID())
+
+	jreq, err := http.Get(job_url)
+
+	if err != nil {
+		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
+		return ""
+	}
+
+	j, err := ioutil.ReadAll(jreq.Body)
+
+	if err != nil {
+		logMsg(fmt.Sprintf("Error reading jobs: %s", err))
+		return ""
+	}
+
+	jreq.Body.Close()
+
+	return string(j)
 }
 
 func (r SyswardApi) JobPostBack(job Job) {

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
 
 type Job struct {
@@ -45,30 +43,14 @@ func runAllJobs(jobs []Job) {
 
 func getJobs(config *Config) []Job {
 	var jobs []Job
-	job_url := config.fetchJobUrl(getSystemUID())
 
-	jreq, err := http.Get(job_url)
+	jobsResponse := api.GetJobs()
 
-	if err != nil {
-		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
-		return jobs
-	}
-
-	j, err := ioutil.ReadAll(jreq.Body)
-
-	if err != nil {
-		logMsg(fmt.Sprintf("Error reading jobs: %s", err))
-		return jobs
-	}
-
-	jreq.Body.Close()
-
-	logMsg(string(j))
-
-	if string(j) == "{}" {
+	logMsg(jobsResponse)
+	if jobsResponse == "" {
 		return jobs
 	} else {
-		err = json.Unmarshal(j, &jobs)
+		err := json.Unmarshal([]byte(jobsResponse), &jobs)
 		if err != nil {
 			panic(err)
 		}
