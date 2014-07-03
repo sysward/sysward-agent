@@ -36,29 +36,14 @@ func (a *Agent) Startup() {
 	verifyRoot()
 	checkPreReqs()
 	logMsg("pre-reqs verified")
-}
-
-var config *Config
-var runner Runner
-var file_reader SystemFileReader
-var package_manager SystemPackageManager
-var api WebApi
-
-func main() {
-	agent := NewAgent()
-	runner = agent.runner
-	file_reader = agent.fileReader
-	package_manager = agent.packageManager
-	api = agent.api
-
-	agent.Startup()
-
 	config = NewConfig("config.json")
-	interval, err := time.ParseDuration(config.Interval)
+	_, err := time.ParseDuration(config.Interval)
 	if err != nil {
 		panic(err)
 	}
+}
 
+func (a *Agent) Run() {
 	for {
 
 		logMsg("package list update - start")
@@ -112,8 +97,26 @@ func main() {
 		logMsg(string(str.Status))
 		logMsg("posting to api - finish")
 
-		time.Sleep(interval)
+		//time.Sleep(interval)
 
 	}
+}
+
+var config *Config
+var runner Runner
+var file_reader SystemFileReader
+var package_manager SystemPackageManager
+var api WebApi
+
+func main() {
+	agent := NewAgent()
+	runner = agent.runner
+	file_reader = agent.fileReader
+	package_manager = agent.packageManager
+	api = agent.api
+
+	agent.Startup()
+
+	agent.Run()
 
 }

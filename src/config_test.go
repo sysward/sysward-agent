@@ -1,24 +1,16 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/url"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-type TestConfig struct{}
-
-func (c TestConfig) ReadFile(path string) []byte {
-	file, _ := ioutil.ReadFile("../config.json")
-	return file
-}
-
 func TestBuildingAConfig(t *testing.T) {
-	syswardConfig = TestConfig{}
+	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid configuration", t, func() {
-		config := NewConfig("config.json")
+		config := NewConfig("../config.json")
 		Convey("The host should be set", func() {
 			So(config.Host, ShouldEqual, "10.0.2.2:5000")
 		})
@@ -40,11 +32,10 @@ func TestBuildingAConfig(t *testing.T) {
 }
 
 func TestURLBuilding(t *testing.T) {
-	syswardConfig = TestConfig{}
 	uid := "abc"
-
+	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid config", t, func() {
-		config := NewConfig("config.json")
+		config := NewConfig("../config.json")
 
 		Convey("fetchJobUrl should be a valid URL", func() {
 			_url := config.fetchJobUrl(uid)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -21,7 +22,9 @@ func TestAgentStartup(t *testing.T) {
 		f := new(MockReader)
 		r.On("Run", "whoami", []string{}).Return("root", nil)
 		runner = r
+		config_json, _ := ioutil.ReadFile("../config.json")
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
+		f.On("ReadFile", "config.json").Return(config_json, nil)
 		file_reader = f
 		agent := Agent{}
 		agent.Startup()

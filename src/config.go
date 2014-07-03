@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 )
 
 type Config struct {
@@ -13,29 +12,13 @@ type Config struct {
 	ApiKey   string `json:"api_key"`
 }
 
-type ConfigReader interface {
-	ReadFile(string) []byte
-}
-
-type SyswardConfig struct{}
-
-func (c SyswardConfig) ReadFile(path string) []byte {
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
-	return file
-}
-
-var syswardConfig ConfigReader
-
 func NewConfig(filepath string) *Config {
 	var err error
 	config := new(Config)
-	if syswardConfig == nil {
-		syswardConfig = SyswardConfig{}
+	if config == nil {
+		config = &Config{}
 	}
-	file := syswardConfig.ReadFile(filepath)
+	file, err := file_reader.ReadFile(filepath)
 
 	// config_json := string(file)
 	err = json.Unmarshal(file, &config)
