@@ -14,10 +14,12 @@ type WebApi interface {
 	CheckIn(AgentData) error
 }
 
-type SyswardApi struct{}
+type SyswardApi struct {
+	httpClient *http.Client
+}
 
 func (r SyswardApi) CheckIn(agentData AgentData) error {
-	client := &http.Client{}
+	client := &r.httpClient
 	logMsg("building json - start")
 	o, err := agentData.ToJson()
 	if err != nil {
@@ -46,9 +48,9 @@ func (r SyswardApi) CheckIn(agentData AgentData) error {
 }
 
 func (r SyswardApi) GetJobs() string {
+	client := &r.httpClient
 	job_url := config.fetchJobUrl(getSystemUID())
-
-	jreq, err := http.Get(job_url)
+	jreq, err := client.Get(job_url)
 
 	if err != nil {
 		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
@@ -56,6 +58,8 @@ func (r SyswardApi) GetJobs() string {
 	}
 
 	j, err := ioutil.ReadAll(jreq.Body)
+
+	logMsg(fmt.Sprintf("[MOCK] %s", j))
 
 	if err != nil {
 		logMsg(fmt.Sprintf("Error reading jobs: %s", err))
@@ -68,7 +72,7 @@ func (r SyswardApi) GetJobs() string {
 }
 
 func (r SyswardApi) JobPostBack(job Job) {
-	client := &http.Client{}
+	client := &r.httpClient
 	data := struct {
 		JobId  int    `json:"job_id"`
 		Status string `json:"status"`

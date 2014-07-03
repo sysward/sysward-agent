@@ -1,6 +1,10 @@
 package main
 
-import "github.com/stretchr/testify/mock"
+import (
+	"net/http"
+
+	"github.com/stretchr/testify/mock"
+)
 
 /* Mocked calls for running system commands */
 type MockRunner struct {
@@ -83,6 +87,7 @@ func (r *MockPackageManager) UpdateCounts() Updates {
 /* Mock WebAPI calls */
 type MockSyswardApi struct {
 	mock.Mock
+	httpClient *http.Client
 }
 
 func (r *MockSyswardApi) JobPostBack(job Job) {

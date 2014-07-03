@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 )
@@ -24,7 +25,7 @@ func NewAgent() *Agent {
 		runner:         SyswardRunner{},
 		fileReader:     SyswardFileReader{},
 		packageManager: DebianPackageManager{},
-		api:            SyswardApi{},
+		api:            SyswardApi{httpClient: &http.Client{}},
 	}
 	return &agent
 }
