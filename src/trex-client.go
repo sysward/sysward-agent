@@ -27,10 +27,15 @@ func NewAgent() *Agent {
 		packageManager: DebianPackageManager{},
 		api:            SyswardApi{httpClient: &http.Client{}},
 	}
+	runner = agent.runner
+	file_reader = agent.fileReader
+	package_manager = agent.packageManager
+	api = agent.api
 	return &agent
 }
 
 func (a *Agent) Startup() {
+
 	verifyRoot()
 	checkPreReqs()
 	logMsg("pre-reqs verified")
@@ -87,13 +92,6 @@ var api WebApi
 
 func main() {
 	agent := NewAgent()
-	runner = agent.runner
-	file_reader = agent.fileReader
-	package_manager = agent.packageManager
-	api = agent.api
-
 	agent.Startup()
-
 	agent.Run()
-
 }
