@@ -13,7 +13,6 @@ func TestExecutingARealCommand(t *testing.T) {
 		So(out, ShouldEqual, "hello world\n")
 		So(err, ShouldBeNil)
 	})
-
 	Convey("The command doesnt exit properly", t, func() {
 		_, err := runner.Run("grep", "foo", "/tmp/fakefile")
 		So(err, ShouldNotBeNil)
