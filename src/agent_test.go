@@ -76,5 +76,9 @@ func TestAgentRun(t *testing.T) {
 	Convey("Agent run should checkin, and gather system information", t, func() {
 		agent := Agent{}
 		agent.Run()
+		//r.Mock.AssertExpectations(t)
+		//f.Mock.AssertExpectations(t)
+		a.Mock.AssertExpectations(t)
+		//pm.Mock.AssertExpectations(t)
 	})
 }

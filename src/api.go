@@ -52,14 +52,12 @@ func (r SyswardApi) GetJobs() string {
 	job_url := config.fetchJobUrl(getSystemUID())
 	jreq, err := client.Get(job_url)
 
-	if err != nil {
+	if err != nil || jreq.StatusCode != 200 {
 		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
 		return ""
 	}
 
 	j, err := ioutil.ReadAll(jreq.Body)
-
-	logMsg(fmt.Sprintf("[MOCK] %s", j))
 
 	if err != nil {
 		logMsg(fmt.Sprintf("Error reading jobs: %s", err))

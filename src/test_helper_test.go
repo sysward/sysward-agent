@@ -104,3 +104,29 @@ func (r *MockSyswardApi) GetJobs() string {
 	args := r.Mock.Called()
 	return args.String(0)
 }
+
+/* Mock Config calls */
+type MockConfig struct {
+	mock.Mock
+	config ConfigSettings
+}
+
+func (c *MockConfig) Config() ConfigSettings {
+	args := c.Mock.Called()
+	return args.Get(0).(ConfigSettings)
+}
+
+func (c *MockConfig) fetchJobUrl(uid string) string {
+	args := c.Mock.Called(uid)
+	return args.String(0)
+}
+
+func (c *MockConfig) fetchJobPostbackUrl() string {
+	args := c.Mock.Called()
+	return args.String(0)
+}
+
+func (c *MockConfig) agentCheckinUrl() string {
+	args := c.Mock.Called()
+	return args.String(0)
+}

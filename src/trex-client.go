@@ -34,8 +34,9 @@ func (a *Agent) Startup() {
 	verifyRoot()
 	checkPreReqs()
 	logMsg("pre-reqs verified")
-	config = NewConfig("config.json")
-	_, err := time.ParseDuration(config.Interval)
+	configSettings := NewConfig("config.json")
+	config = SyswardConfig{config: configSettings}
+	_, err := time.ParseDuration(config.Config().Interval)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +50,7 @@ func (a *Agent) Run() {
 
 		logMsg("checking jobs - start")
 
-		jobs := getJobs(config)
+		jobs := getJobs(config.Config())
 
 		runAllJobs(jobs)
 
@@ -78,7 +79,7 @@ func (a *Agent) Run() {
 	}
 }
 
-var config *Config
+var config Config
 var runner Runner
 var file_reader SystemFileReader
 var package_manager SystemPackageManager

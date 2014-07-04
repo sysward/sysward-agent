@@ -10,21 +10,22 @@ import (
 func TestBuildingAConfig(t *testing.T) {
 	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid configuration", t, func() {
-		config := NewConfig("../config.json")
+		configSettings := NewConfig("../config.json")
+		config = SyswardConfig{config: configSettings}
 		Convey("The host should be set", func() {
-			So(config.Host, ShouldEqual, "10.0.2.2:5000")
+			So(config.Config().Host, ShouldEqual, "10.0.2.2:5000")
 		})
 
 		Convey("The protocol should be http", func() {
-			So(config.Protocol, ShouldEqual, "http")
+			So(config.Config().Protocol, ShouldEqual, "http")
 		})
 
 		Convey("The interval should be set", func() {
-			So(config.Interval, ShouldEqual, "15s")
+			So(config.Config().Interval, ShouldEqual, "15s")
 		})
 
 		Convey("The ApiKey should be set", func() {
-			So(config.ApiKey, ShouldEqual, "d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+			So(config.Config().ApiKey, ShouldEqual, "d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
 		})
 
 	})
@@ -35,7 +36,8 @@ func TestURLBuilding(t *testing.T) {
 	uid := "abc"
 	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid config", t, func() {
-		config := NewConfig("../config.json")
+		configSettings := NewConfig("../config.json")
+		config = SyswardConfig{config: configSettings}
 
 		Convey("fetchJobUrl should be a valid URL", func() {
 			_url := config.fetchJobUrl(uid)

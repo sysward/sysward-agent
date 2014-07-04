@@ -140,7 +140,7 @@ func TestGettingJobs(t *testing.T) {
 			a := new(MockSyswardApi)
 			a.On("GetJobs").Return(`[{"job_id":275,"job_type":"upgrade-package","package_name":"apt"}]`)
 			api = a
-			jobs := getJobs(config)
+			jobs := getJobs(config.Config())
 			So(jobs[0].JobId, ShouldEqual, 275)
 			a.Mock.AssertExpectations(t)
 		})
@@ -149,7 +149,7 @@ func TestGettingJobs(t *testing.T) {
 			a := new(MockSyswardApi)
 			a.On("GetJobs").Return(`[]`)
 			api = a
-			jobs := getJobs(config)
+			jobs := getJobs(config.Config())
 			So(jobs, ShouldBeEmpty)
 			a.Mock.AssertExpectations(t)
 		})
@@ -159,7 +159,7 @@ func TestGettingJobs(t *testing.T) {
 			a := new(MockSyswardApi)
 			a.On("GetJobs").Return(`as0d919{}`)
 			api = a
-			So(func() { getJobs(config) }, ShouldPanic)
+			So(func() { getJobs(config.Config()) }, ShouldPanic)
 			a.Mock.AssertExpectations(t)
 		})
 	})

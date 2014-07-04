@@ -41,7 +41,7 @@ func runAllJobs(jobs []Job) {
 	}
 }
 
-func getJobs(config *Config) []Job {
+func getJobs(config ConfigSettings) []Job {
 	var jobs []Job
 
 	jobsResponse := api.GetJobs()
