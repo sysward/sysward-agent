@@ -13,6 +13,7 @@ wget -q https://github.com/joshrendek/sysward-agent/releases/download/1.0/trex.p
 chmod +x sysward
 echo "+ Moving config into place, please edit config.json and enter your API key"
 mv config.deploy.json config.json
+sed -i "s/APIKEY/$API_KEY/g" config.json
 echo "+ Installing upstart config"
 mv sysward-agent.deploy.conf /etc/init/sysward.conf
 echo "+ Running 'start sysward' to start agent"
