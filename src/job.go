@@ -47,7 +47,7 @@ func getJobs(config ConfigSettings) []Job {
 	jobsResponse := api.GetJobs()
 
 	logMsg(jobsResponse)
-	if jobsResponse == "" {
+	if jobsResponse == "{}" || jobsResponse == "" {
 		return jobs
 	} else {
 		err := json.Unmarshal([]byte(jobsResponse), &jobs)

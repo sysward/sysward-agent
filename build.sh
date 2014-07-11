@@ -1,2 +1,2 @@
 #!/bin/bash
-gxc -target="linux/amd64" build -o trex sysward_agent/src
+gxc -target="linux/amd64" build -o sysward sysward_agent/src
