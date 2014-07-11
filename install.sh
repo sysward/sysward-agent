@@ -15,7 +15,7 @@ echo "+ Moving config into place"
 mv config.deploy.json config.json
 sed -i "s/APIKEY/$API_KEY/g" config.json
 echo "+ Installing upstart config"
-mv sysward-agent.deploy.conf /etc/init/sysward.conf
-echo "+ Running 'start sysward' to start agent"
-start sysward
-echo "+ Logfiles are located at /var/log/upstart/sysward.log"
+mv sysward-agent.deploy.conf /etc/init/sysward-agent.conf
+echo "+ Running 'start sysward-agent' to start agent"
+start sysward-agent
+echo "+ Logfiles are located at /var/log/upstart/sysward-agent.log"
