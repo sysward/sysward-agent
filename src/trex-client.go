@@ -34,21 +34,24 @@ func NewAgent() *Agent {
 	return &agent
 }
 
-func (a *Agent) Startup() {
+var interval *time.Duration
 
+func (a *Agent) Startup() {
 	verifyRoot()
 	checkPreReqs()
 	logMsg("pre-reqs verified")
 	configSettings := NewConfig("config.json")
 	config = SyswardConfig{config: configSettings}
-	_, err := time.ParseDuration(config.Config().Interval)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (a *Agent) Run() {
 	for {
+		interval, err := time.ParseDuration(config.Config().Interval)
+
+		if err != nil {
+			panic(err)
+		}
+
 		logMsg("package list update - start")
 		package_manager.UpdatePackageLists()
 		logMsg("package list update - finish")
@@ -75,12 +78,12 @@ func (a *Agent) Run() {
 			Sources:           sources,
 			InstalledPackages: installed_packages,
 		}
-		err := api.CheckIn(agentData)
+		err = api.CheckIn(agentData)
 		if err != nil {
 			logMsg(fmt.Sprintf("[fatal] %s", err))
 			break
 		}
-		//time.Sleep(interval)
+		time.Sleep(interval)
 	}
 }
 

@@ -1,6 +1,9 @@
 #!/bin/bash
+stop sysward-agent
 mkdir -p /opt/sysward/bin
 cd /opt/sysward/bin
+rm -rf sysward
+rm -rf trex.py
 echo "+ Downloading agent"
 wget -q https://github.com/joshrendek/sysward-agent/releases/download/1.0/sysward
 echo "+ Downloading anget config"
