@@ -9,17 +9,22 @@ import (
 )
 
 func getSystemUID() string {
-	uid, err := file_reader.ReadFile("/sys/class/dmi/id/product_uuid")
-	fmt.Println(uid)
-	if err != nil {
-		panic(err)
+	interface_list, _ := net.Interfaces()
+	var uuid []string
+
+	for _, ifdev := range interface_list {
+		uuid = append(uuid, ifdev.HardwareAddr.String())
 	}
+
+	uid := strings.Join(uuid, ".")
+	fmt.Println(uid)
 	return strings.TrimSpace(string(uid))
 }
 
 func checkPreReqs() {
 	if !file_reader.FileExists("/usr/lib/update-notifier/apt-check") {
 		fmt.Println("update notifier not found, installing")
+		_, err := runner.Run("apt-get", "update")
 		out, err := runner.Run("apt-get", "install", "update-notifier", "-y")
 		if err != nil {
 			panic(err)

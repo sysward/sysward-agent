@@ -60,21 +60,23 @@ except SystemError as e:
     sys.stderr.write("E: "+ _("Error: Marking the upgrade (%s)") % e)
     sys.exit(-1)
 
-with apt.Cache() as aptcache:
-    for pkg in cache.packages:
-        if not (depcache.marked_install(pkg) or depcache.marked_upgrade(pkg)):
-            continue
-        inst_ver = pkg.current_ver
-        cand_ver = depcache.get_candidate_ver(pkg)
-        if inst_ver == None or cand_ver == None:
-            continue
-        if cand_ver == inst_ver:
-            continue
-        record = {
-                "name": pkg.name, "security": isSecurityUpgrade(cand_ver), "section": pkg.section,
-                "current_version": inst_ver.ver_str, "candidate_version": cand_ver.ver_str,
-                "priority": cand_ver.priority_str
-                }
-        output.append(record)
+# use assignment here since apt.Cache() doesn't provide a __exit__ method
+# on Ubuntu 12.04 it looks like
+aptcache = apt.Cache()
+for pkg in cache.packages:
+    if not (depcache.marked_install(pkg) or depcache.marked_upgrade(pkg)):
+        continue
+    inst_ver = pkg.current_ver
+    cand_ver = depcache.get_candidate_ver(pkg)
+    if inst_ver == None or cand_ver == None:
+        continue
+    if cand_ver == inst_ver:
+        continue
+    record = {
+            "name": pkg.name, "security": isSecurityUpgrade(cand_ver), "section": pkg.section,
+            "current_version": inst_ver.ver_str, "candidate_version": cand_ver.ver_str,
+            "priority": cand_ver.priority_str
+            }
+    output.append(record)
 
 print json.dumps(output)
