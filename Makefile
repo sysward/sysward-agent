@@ -1,4 +1,7 @@
-all: build_agent
+all: test
+
+test: 
+	go test -v ./...
 
 build_agent: 
 	./build.sh

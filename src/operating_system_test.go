@@ -1,34 +1,18 @@
 package main
 
 import (
-	"errors"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestSystemUid(t *testing.T) {
-	Convey("Given /sys/class/dmi/id/product_uuid exists", t, func() {
+	Convey("Given i have valid network interfaces with MACs", t, func() {
 		Convey("Then I should get a UID", func() {
-			r := new(MockReader)
-			r.On("ReadFile", "/sys/class/dmi/id/product_uuid").Return([]byte("UUID"), nil)
-			file_reader = r
-			So(getSystemUID(), ShouldEqual, "UUID")
-			r.Mock.AssertExpectations(t)
+			So(getSystemUID(), ShouldContainSubstring, ":")
 		})
 
 	})
-	Convey("Given /sys/class/dmi/id/product_uuid doesnt exist", t, func() {
-		Convey("Then I should panic", func() {
-			r := new(MockReader)
-			r.On("ReadFile", "/sys/class/dmi/id/product_uuid").Return([]byte{}, errors.New("fail"))
-			file_reader = r
-			So(func() { getSystemUID() }, ShouldPanic)
-			r.Mock.AssertExpectations(t)
-		})
-
-	})
-
 }
 
 func TestPrereqs(t *testing.T) {
@@ -45,6 +29,7 @@ func TestPrereqs(t *testing.T) {
 		r := new(MockRunner)
 		f := new(MockReader)
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
+		r.On("Run", "apt-get", []string{"update"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
 		file_reader = f
 		runner = r
@@ -92,10 +77,6 @@ func TestOSInformation(t *testing.T) {
 	r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
 	runner = r
 
-	f := new(MockReader)
-	f.On("ReadFile", "/sys/class/dmi/id/product_uuid").Return([]byte("UUID"), nil)
-	file_reader = f
-
 	os := getOsInformation()
 	Convey("Given I run lsb_release -a", t, func() {
 
@@ -104,7 +85,7 @@ func TestOSInformation(t *testing.T) {
 		})
 
 		Convey("It should have a UID", func() {
-			So(os.UID, ShouldEqual, "UUID")
+			So(os.UID, ShouldContainSubstring, ":")
 		})
 
 		Convey("It should have an OS version", func() {
@@ -129,7 +110,6 @@ func TestOSInformation(t *testing.T) {
 	})
 
 	r.Mock.AssertExpectations(t)
-	f.Mock.AssertExpectations(t)
 }
 
 func TestMemory(t *testing.T) {
