@@ -17,7 +17,6 @@ func getSystemUID() string {
 	}
 
 	uid := strings.Join(uuid, ".")
-	fmt.Println(uid)
 	return strings.TrimSpace(string(uid))
 }
 
