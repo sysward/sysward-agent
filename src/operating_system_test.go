@@ -9,7 +9,7 @@ import (
 func TestSystemUid(t *testing.T) {
 	Convey("Given i have valid network interfaces with MACs", t, func() {
 		Convey("Then I should get a UID", func() {
-			So(getSystemUID(), ShouldContainSubstring, ":")
+			So(getSystemUID(), ShouldContainSubstring, ".")
 		})
 
 	})
@@ -85,7 +85,7 @@ func TestOSInformation(t *testing.T) {
 		})
 
 		Convey("It should have a UID", func() {
-			So(os.UID, ShouldContainSubstring, ":")
+			So(os.UID, ShouldContainSubstring, ".")
 		})
 
 		Convey("It should have an OS version", func() {
