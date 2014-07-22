@@ -116,6 +116,11 @@ func (c *MockConfig) Config() ConfigSettings {
 	return args.Get(0).(ConfigSettings)
 }
 
+func (c *MockConfig) agentPingUrl() string {
+	args := c.Mock.Called()
+	return args.String(0)
+}
+
 func (c *MockConfig) fetchJobUrl(uid string) string {
 	args := c.Mock.Called(uid)
 	return args.String(0)

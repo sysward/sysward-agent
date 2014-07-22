@@ -13,10 +13,21 @@ func getSystemUID() string {
 	var uuid []string
 
 	for _, ifdev := range interface_list {
-		uuid = append(uuid, ifdev.HardwareAddr.String())
+		addToList := true
+		for _, s := range uuid {
+			if s == ifdev.HardwareAddr.String() {
+				addToList = false
+			}
+		}
+		if addToList {
+			uuid = append(uuid, ifdev.HardwareAddr.String())
+		}
 	}
 
 	uid := strings.Join(uuid, ".")
+	if os.Getenv("DEBUG") == "true" {
+		logMsg("UID: " + uid)
+	}
 	return strings.TrimSpace(string(uid))
 }
 

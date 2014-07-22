@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -46,7 +48,31 @@ func (a *Agent) Startup() {
 	config = SyswardConfig{config: configSettings}
 }
 
+func PingApi() {
+	for {
+		client := &http.Client{}
+		data := url.Values{}
+		data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
+
+		req, err := http.NewRequest("POST", config.agentPingUrl(), bytes.NewBufferString(data.Encode()))
+		if err != nil {
+			logMsg(fmt.Sprintf("[fatal ping]: %s", err))
+		}
+		req.Header.Add("X-Sysward-Uid", getSystemUID())
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+		_, err = client.Do(req)
+		if err != nil {
+			logMsg(fmt.Sprintf("[fatal ping]: %s", err))
+		}
+		logMsg("[pinging api]")
+		time.Sleep(15 * time.Second)
+	}
+}
+
 func (a *Agent) Run() {
+	go PingApi()
 	for {
 		CheckForUpdate()
 		interval, err := time.ParseDuration(config.Config().Interval)
@@ -96,8 +122,12 @@ var file_reader SystemFileReader
 var package_manager SystemPackageManager
 var api WebApi
 
+func CurrentVersion() int {
+	return 23
+}
+
 func CheckForUpdate() {
-	version := 20
+	version := CurrentVersion()
 	resp, err := http.Get("http://updates.sysward.com/version")
 	if err != nil {
 		panic(err)

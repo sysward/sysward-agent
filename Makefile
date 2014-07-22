@@ -14,5 +14,5 @@ release: build_agent bump_version push
 
 
 push:
-	scp version sysward sysward@web1.sysward.com:~/updates/public
+	scp sysward version sysward@web1.sysward.com:~/updates/public
 

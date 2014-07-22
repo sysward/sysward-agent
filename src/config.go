@@ -16,6 +16,7 @@ type Config interface {
 	fetchJobUrl(string) string
 	fetchJobPostbackUrl() string
 	agentCheckinUrl() string
+	agentPingUrl() string
 	Config() ConfigSettings
 }
 
@@ -46,6 +47,10 @@ func (c SyswardConfig) fetchJobUrl(uid string) string {
 
 func (c SyswardConfig) fetchJobPostbackUrl() string {
 	return fmt.Sprintf("%s://%s/api/v1/postback?api_key=%s", c.config.Protocol, c.config.Host, c.config.ApiKey)
+}
+
+func (c SyswardConfig) agentPingUrl() string {
+	return fmt.Sprintf("%s://%s/api/v1/ping?api_key=%s", c.config.Protocol, c.config.Host, c.config.ApiKey)
 }
 
 func (c SyswardConfig) agentCheckinUrl() string {

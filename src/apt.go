@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -10,7 +11,15 @@ import (
 type DebianPackageManager struct{}
 
 func (pm DebianPackageManager) UpdatePackage(pkg string) error {
-	out, err := runner.Run("apt-get", "install", "-y", pkg)
+	out, err := runner.Run("apt-get",
+		"-y",
+		"install", pkg)
+	if os.Getenv("DEBUG") == "true" {
+		debugMsg := strings.Join([]string{"apt-get",
+			"-y",
+			"install", pkg}, " ")
+		logMsg("Command: " + debugMsg)
+	}
 	logMsg(string(out))
 	return err
 }

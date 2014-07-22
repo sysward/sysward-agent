@@ -43,7 +43,9 @@ func TestPackageUpdates(t *testing.T) {
 
 		Convey("The package should be upgraded", func() {
 			r := new(MockRunner)
-			r.On("Run", "apt-get", []string{"install", "-y", "apt"}).Return("", nil)
+			r.On("Run", "apt-get", []string{"-y",
+				"install",
+				"apt"}).Return("", nil)
 			runner = r
 			err := package_manager.UpdatePackage("apt")
 			So(err, ShouldBeNil)
@@ -52,7 +54,9 @@ func TestPackageUpdates(t *testing.T) {
 
 		Convey("The package should not upgrade if held", func() {
 			r := new(MockRunner)
-			r.On("Run", "apt-get", []string{"install", "-y", "apt"}).Return("", errors.New("fail"))
+			r.On("Run", "apt-get", []string{"-y",
+				"install",
+				"apt"}).Return("", errors.New("fail"))
 			runner = r
 			err := package_manager.UpdatePackage("apt")
 			So(err, ShouldNotBeNil)
