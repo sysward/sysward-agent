@@ -28,6 +28,8 @@ func (job *Job) run() {
 
 	if err != nil {
 		logMsg(err.Error())
+		api.JobFailure(*job, err.Error())
+
 	} else {
 		logMsg(fmt.Sprintf("[job] Posting back for job: %d", job.JobId))
 		api.JobPostBack(*job)

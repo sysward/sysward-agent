@@ -11,7 +11,7 @@ func TestBuildingAConfig(t *testing.T) {
 	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid configuration", t, func() {
 		configSettings := NewConfig("../config.json")
-		config = SyswardConfig{config: configSettings}
+		config = SyswardConfig{AgentConfig: configSettings}
 		Convey("The host should be set", func() {
 			So(config.Config().Host, ShouldEqual, "10.0.2.2:5000")
 		})
@@ -37,7 +37,7 @@ func TestURLBuilding(t *testing.T) {
 	file_reader = SyswardFileReader{}
 	Convey("Given I have a valid config", t, func() {
 		configSettings := NewConfig("../config.json")
-		config = SyswardConfig{config: configSettings}
+		config = SyswardConfig{AgentConfig: configSettings}
 
 		Convey("fetchJobUrl should be a valid URL", func() {
 			_url := config.fetchJobUrl(uid)

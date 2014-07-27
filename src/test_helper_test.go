@@ -90,6 +90,11 @@ type MockSyswardApi struct {
 	httpClient *http.Client
 }
 
+func (r *MockSyswardApi) JobFailure(job Job, error_string string) {
+	r.Mock.Called(job, error_string)
+	return
+}
+
 func (r *MockSyswardApi) JobPostBack(job Job) {
 	r.Mock.Called(job)
 	return
@@ -114,6 +119,11 @@ type MockConfig struct {
 func (c *MockConfig) Config() ConfigSettings {
 	args := c.Mock.Called()
 	return args.Get(0).(ConfigSettings)
+}
+
+func (c *MockConfig) SetProtocol(protocol string) {
+	c.Mock.Called(protocol)
+	return
 }
 
 func (c *MockConfig) agentPingUrl() string {

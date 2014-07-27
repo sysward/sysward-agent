@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -21,18 +22,27 @@ func (pm DebianPackageManager) UpdatePackage(pkg string) error {
 		logMsg("Command: " + debugMsg)
 	}
 	logMsg(string(out))
+	if err != nil {
+		err = errors.New(string(out) + err.Error())
+	}
 	return err
 }
 
 func (pm DebianPackageManager) HoldPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "hold", pkg)
 	logMsg(string(out))
+	if err != nil {
+		err = errors.New(string(out) + err.Error())
+	}
 	return err
 }
 
 func (pm DebianPackageManager) UnholdPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "unhold", pkg)
 	logMsg(string(out))
+	if err != nil {
+		err = errors.New(string(out) + err.Error())
+	}
 	return err
 }
 

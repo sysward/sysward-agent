@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -19,6 +21,11 @@ func TestNewAgent(t *testing.T) {
 
 func TestAgentStartup(t *testing.T) {
 	Convey("Agent startup should verify root and check pre-req packages", t, func() {
+		handler := func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+		}
+		server := httptest.NewServer(http.HandlerFunc(handler))
+		defer server.Close()
 		r := new(MockRunner)
 		f := new(MockReader)
 		r.On("Run", "whoami", []string{}).Return("root", nil)
@@ -29,6 +36,7 @@ func TestAgentStartup(t *testing.T) {
 		file_reader = f
 		agent := Agent{}
 		agent.Startup()
+		api = SyswardApi{httpClient: &http.Client{}}
 		f.Mock.AssertExpectations(t)
 		r.Mock.AssertExpectations(t)
 	})

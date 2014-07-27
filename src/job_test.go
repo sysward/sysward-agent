@@ -64,6 +64,7 @@ func TestRunningAJob(t *testing.T) {
 	Convey("Given an invalid job type", t, func() {
 		job.JobType = "foobar"
 		a.AssertNotCalled(t, "JobPostBack", job)
+		a.On("JobFailure", job, "[job] Unknown job type: foobar").Return(nil)
 		package_manager = pm
 		api = a
 		job.run()

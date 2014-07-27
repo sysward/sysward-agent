@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -29,7 +30,7 @@ func NewAgent() *Agent {
 		runner:         SyswardRunner{},
 		fileReader:     SyswardFileReader{},
 		packageManager: DebianPackageManager{},
-		api:            SyswardApi{httpClient: &http.Client{}},
+		api:            SyswardApi{httpClient: GetHttpClient()},
 	}
 	runner = agent.runner
 	file_reader = agent.fileReader
@@ -45,12 +46,20 @@ func (a *Agent) Startup() {
 	checkPreReqs()
 	logMsg("pre-reqs verified")
 	configSettings := NewConfig("config.json")
-	config = SyswardConfig{config: configSettings}
+	config = SyswardConfig{AgentConfig: configSettings}
+}
+
+func GetHttpClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
 
 func PingApi() {
 	for {
-		client := &http.Client{}
+		client := GetHttpClient()
 		data := url.Values{}
 		data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
 
@@ -123,7 +132,7 @@ var package_manager SystemPackageManager
 var api WebApi
 
 func CurrentVersion() int {
-	return 23
+	return 26
 }
 
 func CheckForUpdate() {
@@ -161,5 +170,29 @@ func CheckForUpdate() {
 func main() {
 	agent := NewAgent()
 	agent.Startup()
+
+	// set Protocol to https if getting a 301 moved
+	client := GetHttpClient()
+	apiEndpoint := fmt.Sprintf("%s://%s", config.Config().Protocol, config.Config().Host)
+	logMsg("Protocol: " + config.Config().Protocol)
+	resp, err := client.Get(apiEndpoint)
+	if err != nil {
+		logMsg("Error connecting to the API")
+	}
+
+	if err == nil {
+		if resp.TLS != nil {
+			logMsg("API using https, switching config protocol")
+			newConfig := ConfigSettings{
+				Host:     config.Config().Host,
+				Protocol: "https",
+				Interval: config.Config().Interval,
+				ApiKey:   config.Config().ApiKey,
+			}
+			config = SyswardConfig{AgentConfig: newConfig}
+			logMsg("Config protocol: " + config.Config().Protocol)
+		}
+	}
+
 	agent.Run()
 }
