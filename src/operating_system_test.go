@@ -85,7 +85,7 @@ func TestOSInformation(t *testing.T) {
 		})
 
 		Convey("It should have a UID", func() {
-			So(os.UID, ShouldContainSubstring, ".")
+			So(os.UID, ShouldNotBeNil)
 		})
 
 		Convey("It should have an OS version", func() {
