@@ -6,7 +6,7 @@ rm -rf sysward
 rm -rf trex.py
 echo "+ Downloading agent"
 wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/sysward
-echo "+ Downloading anget config"
+echo "+ Downloading agent config"
 wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/config.deploy.json
 echo "+ Downloading upstart config"
 wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/sysward-agent.deploy.conf
