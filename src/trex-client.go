@@ -6,16 +6,26 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func logMsg(msg string) {
-	logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	logfile.Println(msg)
+	logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	pc, _, _, _ := runtime.Caller(1)
+	caller := runtime.FuncForPC(pc).Name()
+	_, file, line, _ := runtime.Caller(0)
+	sp := strings.Split(file, "/")
+	short_path := sp[len(sp)-2 : len(sp)]
+	path_line := fmt.Sprintf("[%s:%d]", short_path[1], line)
+	log_string := fmt.Sprintf("%s{%s}:: %s", path_line, caller, msg)
+	logfile.Println(log_string)
 }
 
 type Agent struct {
@@ -49,9 +59,16 @@ func (a *Agent) Startup() {
 	config = SyswardConfig{AgentConfig: configSettings}
 }
 
+var timeout = time.Duration(2 * time.Second)
+
+func dialTimeout(network, addr string) (net.Conn, error) {
+	return net.DialTimeout(network, addr, timeout)
+}
+
 func GetHttpClient() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Dial:            dialTimeout,
 	}
 	client := &http.Client{Transport: tr}
 	return client
@@ -66,6 +83,8 @@ func PingApi() {
 		req, err := http.NewRequest("POST", config.agentPingUrl(), bytes.NewBufferString(data.Encode()))
 		if err != nil {
 			logMsg(fmt.Sprintf("[fatal ping]: %s", err))
+			time.Sleep(15 * time.Second)
+			continue
 		}
 		req.Header.Add("X-Sysward-Uid", getSystemUID())
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -139,7 +158,8 @@ func CheckForUpdate() {
 	version := CurrentVersion()
 	resp, err := http.Get("http://updates.sysward.com/version")
 	if err != nil {
-		panic(err)
+		logMsg(err.Error())
+		return
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

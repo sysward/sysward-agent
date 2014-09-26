@@ -54,7 +54,7 @@ func (r SyswardApi) GetJobs() string {
 	jreq, err := client.Get(job_url)
 
 	if err != nil || jreq.StatusCode != 200 {
-		logMsg(fmt.Sprintf("Error requesting jobs: %s | status code: ", err, jreq.StatusCode))
+		logMsg(fmt.Sprintf("Error requesting jobs: %s", err))
 		return ""
 	}
 

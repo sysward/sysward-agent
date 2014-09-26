@@ -25,7 +25,7 @@ func TestBuildingAConfig(t *testing.T) {
 		})
 
 		Convey("The ApiKey should be set", func() {
-			So(config.Config().ApiKey, ShouldEqual, "d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+			So(config.Config().ApiKey, ShouldNotBeNil)
 		})
 
 	})
@@ -43,21 +43,21 @@ func TestURLBuilding(t *testing.T) {
 			_url := config.fetchJobUrl(uid)
 			u, _ := url.Parse(_url)
 			So(u.Path, ShouldEqual, "/api/v1/jobs")
-			So(u.RawQuery, ShouldEqual, "uid=abc&api_key=d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+			So(u.RawQuery, ShouldContainSubstring, "uid=abc&api_key=")
 		})
 
 		Convey("fetchJobPostbackUrl should be a valid URL", func() {
 			_url := config.fetchJobPostbackUrl()
 			u, _ := url.Parse(_url)
 			So(u.Path, ShouldEqual, "/api/v1/postback")
-			So(u.RawQuery, ShouldEqual, "api_key=d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+			So(u.RawQuery, ShouldContainSubstring, "api_key=")
 		})
 
 		Convey("agentCheckinUrl should be a valid URL", func() {
 			_url := config.agentCheckinUrl()
 			u, _ := url.Parse(_url)
 			So(u.Path, ShouldEqual, "/api/v1/agent")
-			So(u.RawQuery, ShouldEqual, "api_key=d4b6c0ebf64456b1bec50cc679b146ed77b88195d681b96a902d15299c1ed51a")
+			So(u.RawQuery, ShouldContainSubstring, "api_key=")
 		})
 
 	})
