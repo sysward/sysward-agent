@@ -15,6 +15,13 @@ func getSystemUID() string {
 	for _, ifdev := range interface_list {
 		addToList := true
 		for _, s := range uuid {
+			if strings.Contains(ifdev.Name, "dummy") {
+				addToList = false
+				continue
+			}
+			if os.Getenv("DEBUG") == "true" {
+				logMsg("Name: " + ifdev.Name + " <-> HWADDR: " + ifdev.HardwareAddr.String())
+			}
 			if s == ifdev.HardwareAddr.String() {
 				addToList = false
 			}

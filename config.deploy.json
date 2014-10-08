@@ -1,6 +1,6 @@
 {
   "host": "sysward.com",
   "protocol": "https",
-  "interval": "5m",
+  "interval": "1m",
   "api_key": "APIKEY"
 }
