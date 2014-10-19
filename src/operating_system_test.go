@@ -20,7 +20,7 @@ func TestPrereqs(t *testing.T) {
 	Convey("Given pre-req's are installed", t, func() {
 		f := new(MockReader)
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
-		file_reader = f
+		fileReader = f
 		So(func() { checkPreReqs() }, ShouldNotPanic)
 		f.Mock.AssertExpectations(t)
 	})
@@ -31,7 +31,7 @@ func TestPrereqs(t *testing.T) {
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
 		r.On("Run", "apt-get", []string{"update"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
-		file_reader = f
+		fileReader = f
 		runner = r
 		checkPreReqs()
 		f.Mock.AssertExpectations(t)

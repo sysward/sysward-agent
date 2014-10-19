@@ -39,7 +39,7 @@ func getSystemUID() string {
 }
 
 func checkPreReqs() {
-	if !file_reader.FileExists("/usr/lib/update-notifier/apt-check") {
+	if !fileReader.FileExists("/usr/lib/update-notifier/apt-check") {
 		fmt.Println("update notifier not found, installing")
 		_, err := runner.Run("apt-get", "update")
 		out, err := runner.Run("apt-get", "install", "update-notifier", "-y")

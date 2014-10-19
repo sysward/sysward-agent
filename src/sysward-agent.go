@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"log/syslog"
 	"net"
 	"net/http"
 	"net/url"
@@ -17,15 +17,16 @@ import (
 )
 
 func logMsg(msg string) {
-	logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	logfile, _ := syslog.New(syslog.LOG_NOTICE, "SYSWARD")
+	//logfile := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 	pc, _, _, _ := runtime.Caller(1)
 	caller := runtime.FuncForPC(pc).Name()
 	_, file, line, _ := runtime.Caller(0)
 	sp := strings.Split(file, "/")
-	short_path := sp[len(sp)-2 : len(sp)]
-	path_line := fmt.Sprintf("[%s:%d]", short_path[1], line)
-	log_string := fmt.Sprintf("%s{%s}:: %s", path_line, caller, msg)
-	logfile.Println(log_string)
+	shortPath := sp[len(sp)-2 : len(sp)]
+	pathLine := fmt.Sprintf("[%s:%d]", shortPath[1], line)
+	logString := fmt.Sprintf("%s{%s}:: %s", pathLine, caller, msg)
+	logfile.Info(logString)
 }
 
 type Agent struct {
@@ -43,8 +44,8 @@ func NewAgent() *Agent {
 		api:            SyswardApi{httpClient: GetHttpClient()},
 	}
 	runner = agent.runner
-	file_reader = agent.fileReader
-	package_manager = agent.packageManager
+	fileReader = agent.fileReader
+	packageManager = agent.packageManager
 	api = agent.api
 	return &agent
 }
@@ -101,53 +102,45 @@ func PingApi() {
 
 func (a *Agent) Run() {
 	go PingApi()
-	for {
-		CheckForUpdate()
-		interval, err := time.ParseDuration(config.Config().Interval)
+	CheckForUpdate()
 
-		if err != nil {
-			panic(err)
-		}
+	logMsg("package list update - start")
+	packageManager.UpdatePackageLists()
+	logMsg("package list update - finish")
 
-		logMsg("package list update - start")
-		package_manager.UpdatePackageLists()
-		logMsg("package list update - finish")
+	logMsg("checking jobs - start")
 
-		logMsg("checking jobs - start")
+	jobs := getJobs(config.Config())
 
-		jobs := getJobs(config.Config())
+	runAllJobs(jobs)
 
-		runAllJobs(jobs)
+	logMsg("checking jobs - finish")
 
-		logMsg("checking jobs - finish")
+	counts := packageManager.UpdateCounts()
+	operatingSystem := getOsInformation()
+	packages := packageManager.BuildPackageList()
+	sources := packageManager.GetSourcesList()
 
-		counts := package_manager.UpdateCounts()
-		operating_system := getOsInformation()
-		packages := package_manager.BuildPackageList()
-		sources := package_manager.GetSourcesList()
+	installedPackages := packageManager.BuildInstalledPackageList()
 
-		installed_packages := package_manager.BuildInstalledPackageList()
+	agentData := AgentData{
+		Packages:          packages,
+		SystemUpdates:     counts,
+		OperatingSystem:   operatingSystem,
+		Sources:           sources,
+		InstalledPackages: installedPackages,
+	}
 
-		agentData := AgentData{
-			Packages:          packages,
-			SystemUpdates:     counts,
-			OperatingSystem:   operating_system,
-			Sources:           sources,
-			InstalledPackages: installed_packages,
-		}
-		err = api.CheckIn(agentData)
-		if err != nil {
-			logMsg(fmt.Sprintf("[fatal] %s", err))
-			break
-		}
-		time.Sleep(interval)
+	err := api.CheckIn(agentData)
+	if err != nil {
+		logMsg(fmt.Sprintf("[fatal] %s", err))
 	}
 }
 
 var config Config
 var runner Runner
-var file_reader SystemFileReader
-var package_manager SystemPackageManager
+var fileReader SystemFileReader
+var packageManager SystemPackageManager
 var api WebApi
 
 func CurrentVersion() int {
@@ -167,12 +160,12 @@ func CheckForUpdate() {
 		panic(err)
 	}
 
-	latest_version, err := strconv.Atoi(string(body))
+	latestVersion, err := strconv.Atoi(string(body))
 	if err != nil {
 		panic(err)
 	}
 
-	if latest_version > version {
+	if latestVersion > version {
 		logMsg(fmt.Sprintf("Current Version: %d", version))
 		logMsg("Downloading latest version: " + string(body))
 		runner.Run("mv", "/opt/sysward/bin/sysward", "/opt/sysward/bin/sysward.old")
@@ -187,8 +180,52 @@ func CheckForUpdate() {
 
 }
 
+func CheckIfAgentIsRunning() {
+	procList, _ := runner.Run("ps", "ax")
+	out := strings.Split(procList, "\n")
+	counter := 0
+	for _, proc := range out {
+		if strings.Contains(proc, "./sysward") && !strings.Contains(proc, "cd") {
+			counter++
+		}
+	}
+	if counter > 1 {
+		logMsg(fmt.Sprintf("Sysward already running, exiting. Running: %d", counter))
+		os.Exit(1)
+	} else {
+		logMsg("Sysward is starting.")
+	}
+}
+
 func main() {
 	agent := NewAgent()
+
+	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward\n"
+	cronTab, _ := ioutil.ReadFile("/etc/crontab")
+	if strings.Contains(string(cronTab), "bin && ./sysward") {
+		fmt.Println("+ Cron already installed")
+	} else {
+		fmt.Println("+ CRON missing - installing")
+		f, err := os.OpenFile("/etc/crontab", os.O_APPEND|os.O_WRONLY, 0600)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		if _, err = f.WriteString(cronString); err != nil {
+			panic(err)
+		}
+		fmt.Println("CRON installed.")
+	}
+
+	if fileReader.FileExists("/etc/init/sysward-agent.conf") {
+		fmt.Println("+ Removing upstart config and converting to CRON job...")
+		runner.Run("/sbin/stop", "sysward-agent")
+		runner.Run("rm", "-rf", "/etc/init/sysward-agent.conf")
+		fmt.Println("+ Upstart configs removed and service stopped.")
+	}
+
+	CheckIfAgentIsRunning()
 	agent.Startup()
 
 	// set Protocol to https if getting a 301 moved

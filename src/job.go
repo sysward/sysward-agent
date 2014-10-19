@@ -17,11 +17,11 @@ func (job *Job) run() {
 
 	if job.JobType == "upgrade-package" {
 		logMsg(fmt.Sprintf("[apt] upgrading: %s", job.PackageName))
-		err = package_manager.UpdatePackage(job.PackageName)
+		err = packageManager.UpdatePackage(job.PackageName)
 	} else if job.JobType == "hold-package" {
-		err = package_manager.HoldPackage(job.PackageName)
+		err = packageManager.HoldPackage(job.PackageName)
 	} else if job.JobType == "unhold-package" {
-		err = package_manager.UnholdPackage(job.PackageName)
+		err = packageManager.UnholdPackage(job.PackageName)
 	} else {
 		err = errors.New(fmt.Sprintf("[job] Unknown job type: %s", job.JobType))
 	}

@@ -21,7 +21,7 @@ func TestRunningAJob(t *testing.T) {
 			job.JobType = "upgrade-package"
 			a.On("JobPostBack", job).Return()
 			pm.On("UpdatePackage", "apt").Return(nil)
-			package_manager = pm
+			packageManager = pm
 			api = a
 			job.run()
 			pm.Mock.AssertExpectations(t)
@@ -36,7 +36,7 @@ func TestRunningAJob(t *testing.T) {
 			job.JobType = "hold-package"
 			a.On("JobPostBack", job).Return()
 			pm.On("HoldPackage", "apt").Return(nil)
-			package_manager = pm
+			packageManager = pm
 			api = a
 			job.run()
 			pm.Mock.AssertExpectations(t)
@@ -52,7 +52,7 @@ func TestRunningAJob(t *testing.T) {
 			job.JobType = "unhold-package"
 			a.On("JobPostBack", job).Return()
 			pm.On("UnholdPackage", "apt").Return(nil)
-			package_manager = pm
+			packageManager = pm
 			api = a
 			job.run()
 			pm.Mock.AssertExpectations(t)
@@ -65,7 +65,7 @@ func TestRunningAJob(t *testing.T) {
 		job.JobType = "foobar"
 		a.AssertNotCalled(t, "JobPostBack", job)
 		a.On("JobFailure", job, "[job] Unknown job type: foobar").Return(nil)
-		package_manager = pm
+		packageManager = pm
 		api = a
 		job.run()
 		pm.Mock.AssertExpectations(t)
@@ -115,7 +115,7 @@ func TestRunningAllJobs(t *testing.T) {
 			a.On("JobPostBack", jobs[1]).Return()
 			pm.On("UpdatePackage", "apt").Return(nil)
 			pm.On("UpdatePackage", "foo").Return(nil)
-			package_manager = pm
+			packageManager = pm
 			api = a
 			runAllJobs(jobs)
 			pm.Mock.AssertExpectations(t)

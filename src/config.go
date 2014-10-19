@@ -28,7 +28,7 @@ type SyswardConfig struct {
 func NewConfig(filepath string) ConfigSettings {
 	var err error
 	config := ConfigSettings{}
-	file, err := file_reader.ReadFile(filepath)
+	file, err := fileReader.ReadFile(filepath)
 
 	// config_json := string(file)
 	err = json.Unmarshal(file, &config)
