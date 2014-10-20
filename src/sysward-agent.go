@@ -144,7 +144,7 @@ var packageManager SystemPackageManager
 var api WebApi
 
 func CurrentVersion() int {
-	return 29
+	return 30
 }
 
 func CheckForUpdate() {
