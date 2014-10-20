@@ -33,7 +33,7 @@ func TestAgentStartup(t *testing.T) {
 		config_json, _ := ioutil.ReadFile("../config.json")
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("ReadFile", "config.json").Return(config_json, nil)
-		file_reader = f
+		fileReader = f
 		agent := Agent{}
 		agent.Startup()
 		api = SyswardApi{httpClient: &http.Client{}}
@@ -63,19 +63,19 @@ func TestAgentRun(t *testing.T) {
 	pm.On("GetSourcesList").Return([]Source{})
 	pm.On("BuildInstalledPackageList").Return([]string{})
 
-	package_manager = pm
+	packageManager = pm
 
 	config_json, _ := ioutil.ReadFile("../config.json")
 	f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 	f.On("ReadFile", "config.json").Return(config_json, nil)
-	file_reader = f
+	fileReader = f
 
 	agentData := AgentData{
-		Packages:          package_manager.BuildPackageList(),
-		SystemUpdates:     package_manager.UpdateCounts(),
+		Packages:          packageManager.BuildPackageList(),
+		SystemUpdates:     packageManager.UpdateCounts(),
 		OperatingSystem:   getOsInformation(),
-		Sources:           package_manager.GetSourcesList(),
-		InstalledPackages: package_manager.BuildInstalledPackageList(),
+		Sources:           packageManager.GetSourcesList(),
+		InstalledPackages: packageManager.BuildInstalledPackageList(),
 	}
 
 	a.On("CheckIn", agentData).Return(errors.New("foo"))

@@ -8,7 +8,7 @@ import (
 )
 
 func TestBuildingAConfig(t *testing.T) {
-	file_reader = SyswardFileReader{}
+	fileReader = SyswardFileReader{}
 	Convey("Given I have a valid configuration", t, func() {
 		configSettings := NewConfig("../config.json")
 		config = SyswardConfig{AgentConfig: configSettings}
@@ -34,7 +34,7 @@ func TestBuildingAConfig(t *testing.T) {
 
 func TestURLBuilding(t *testing.T) {
 	uid := "abc"
-	file_reader = SyswardFileReader{}
+	fileReader = SyswardFileReader{}
 	Convey("Given I have a valid config", t, func() {
 		configSettings := NewConfig("../config.json")
 		config = SyswardConfig{AgentConfig: configSettings}
