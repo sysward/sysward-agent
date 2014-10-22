@@ -17,4 +17,4 @@ mv config.deploy.json config.json
 sed -i "s/APIKEY/$API_KEY/g" config.json
 echo "+ Running agent one time"
 ./sysward
-echo "+ Logfiles are located at /var/log/sysward.log and tagged with SYSWARD"
+echo "+ Logfiles are located at /var/log/syslog and tagged with SYSWARD"

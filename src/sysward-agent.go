@@ -144,7 +144,7 @@ var packageManager SystemPackageManager
 var api WebApi
 
 func CurrentVersion() int {
-	return 30
+	return 31
 }
 
 func CheckForUpdate() {
@@ -200,12 +200,12 @@ func CheckIfAgentIsRunning() {
 func main() {
 	agent := NewAgent()
 
-	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward\n"
+	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward >> /dev/null\n"
 	cronTab, _ := ioutil.ReadFile("/etc/crontab")
 	if strings.Contains(string(cronTab), "bin && ./sysward") {
-		fmt.Println("+ Cron already installed")
+		logMsg("+ Cron already installed")
 	} else {
-		fmt.Println("+ CRON missing - installing")
+		logMsg("+ CRON missing - installing")
 		f, err := os.OpenFile("/etc/crontab", os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
 			panic(err)
@@ -215,14 +215,14 @@ func main() {
 		if _, err = f.WriteString(cronString); err != nil {
 			panic(err)
 		}
-		fmt.Println("CRON installed.")
+		logMsg("CRON installed.")
 	}
 
 	if fileReader.FileExists("/etc/init/sysward-agent.conf") {
-		fmt.Println("+ Removing upstart config and converting to CRON job...")
+		logMsg("+ Removing upstart config and converting to CRON job...")
 		runner.Run("/sbin/stop", "sysward-agent")
 		runner.Run("rm", "-rf", "/etc/init/sysward-agent.conf")
-		fmt.Println("+ Upstart configs removed and service stopped.")
+		logMsg("+ Upstart configs removed and service stopped.")
 	}
 
 	CheckIfAgentIsRunning()
