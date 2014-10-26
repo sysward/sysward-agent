@@ -31,6 +31,25 @@ func TestCheckIn(t *testing.T) {
 
 }
 
+func TestApiJobFailure(t *testing.T) {
+	Convey("Job failure should send the job data to the server", t, func() {
+		handler := func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			body, _ := ioutil.ReadAll(r.Body)
+			So(string(body), ShouldEqual, `{"job_id":1,"status":"failure","error_message":"failed"}`)
+			w.WriteHeader(200)
+		}
+		server := httptest.NewServer(http.HandlerFunc(handler))
+		defer server.Close()
+		api = SyswardApi{httpClient: &http.Client{}}
+		c := new(MockConfig)
+		c.On("fetchJobPostbackUrl").Return(server.URL)
+		config = c
+
+		api.JobFailure(Job{JobId: 1}, "failed")
+	})
+}
+
 func TestApiJobPostBack(t *testing.T) {
 	Convey("Accepting a job post back", t, func() {
 		handler := func(w http.ResponseWriter, r *http.Request) {

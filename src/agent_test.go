@@ -19,6 +19,34 @@ func TestNewAgent(t *testing.T) {
 	})
 }
 
+func TestAgentCronInstall(t *testing.T) {
+	Convey("Cron job must be installed", t, func() {
+		agent := NewAgent()
+		f := new(MockReader)
+		Convey("Cron is already installed, upstart config doesnt exist", func() {
+			f.On("ReadFile", "/etc/crontab").Return([]byte("bin && ./sysward"), nil)
+			f.On("FileExists", "/etc/init/sysward-agent.conf").Return(false)
+			fileReader = f
+			agent.InstallCron()
+			f.Mock.AssertExpectations(t)
+		})
+
+		// TODO: Interface out the cron installation
+		Convey("Cron is not installed, upstart config exists", func() {
+			r := new(MockRunner)
+			r.On("Run", "/sbin/stop", []string{"sysward-agent"}).Return("", nil)
+			r.On("Run", "rm", []string{"-rf", "/etc/init/sysward-agent.conf"}).Return("", nil)
+			f.On("ReadFile", "/etc/crontab").Return([]byte("bin && ./sysward"), nil)
+			f.On("FileExists", "/etc/init/sysward-agent.conf").Return(true)
+			fileReader = f
+			runner = r
+			agent.InstallCron()
+			f.Mock.AssertExpectations(t)
+			r.Mock.AssertExpectations(t)
+		})
+	})
+}
+
 func TestAgentStartup(t *testing.T) {
 	Convey("Agent startup should verify root and check pre-req packages", t, func() {
 		handler := func(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +68,32 @@ func TestAgentStartup(t *testing.T) {
 		f.Mock.AssertExpectations(t)
 		r.Mock.AssertExpectations(t)
 	})
+}
+
+func TestIfAgentIsRunning(t *testing.T) {
+	packageManager = DebianPackageManager{}
+	Convey("Checking if the agent is running", t, func() {
+
+		Convey("Agent is running", func() {
+			r := new(MockRunner)
+			r.On("Run", "ps", []string{"ax"}).Return("./sysward\n./sysward", nil)
+			runner = r
+			So(CheckIfAgentIsRunning, ShouldPanic)
+			r.Mock.AssertExpectations(t)
+		})
+
+		Convey("Agent isn't running", func() {
+			r := new(MockRunner)
+			// We're testing the case where its the only process running
+			r.On("Run", "ps", []string{"ax"}).Return("./sysward\n", nil)
+			runner = r
+			So(CheckIfAgentIsRunning, ShouldNotPanic)
+			r.Mock.AssertExpectations(t)
+		})
+
+	})
+
+	runner = SyswardRunner{}
 }
 
 func TestAgentRun(t *testing.T) {

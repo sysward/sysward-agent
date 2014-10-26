@@ -137,6 +137,33 @@ func (a *Agent) Run() {
 	}
 }
 
+func (a *Agent) InstallCron() {
+	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward >> /dev/null\n"
+	cronTab, _ := fileReader.ReadFile("/etc/crontab")
+	if strings.Contains(string(cronTab), "bin && ./sysward") {
+		logMsg("+ Cron already installed")
+	} else {
+		logMsg("+ CRON missing - installing")
+		f, err := os.OpenFile("/etc/crontab", os.O_APPEND|os.O_WRONLY, 0600)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		if _, err = f.WriteString(cronString); err != nil {
+			panic(err)
+		}
+		logMsg("CRON installed.")
+	}
+
+	if fileReader.FileExists("/etc/init/sysward-agent.conf") {
+		logMsg("+ Removing upstart config and converting to CRON job...")
+		runner.Run("/sbin/stop", "sysward-agent")
+		runner.Run("rm", "-rf", "/etc/init/sysward-agent.conf")
+		logMsg("+ Upstart configs removed and service stopped.")
+	}
+}
+
 var config Config
 var runner Runner
 var fileReader SystemFileReader
@@ -191,7 +218,7 @@ func CheckIfAgentIsRunning() {
 	}
 	if counter > 1 {
 		logMsg(fmt.Sprintf("Sysward already running, exiting. Running: %d", counter))
-		os.Exit(1)
+		panic("Sysward already running, exiting.")
 	} else {
 		logMsg("Sysward is starting.")
 	}
@@ -200,32 +227,9 @@ func CheckIfAgentIsRunning() {
 func main() {
 	agent := NewAgent()
 
-	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward >> /dev/null\n"
-	cronTab, _ := ioutil.ReadFile("/etc/crontab")
-	if strings.Contains(string(cronTab), "bin && ./sysward") {
-		logMsg("+ Cron already installed")
-	} else {
-		logMsg("+ CRON missing - installing")
-		f, err := os.OpenFile("/etc/crontab", os.O_APPEND|os.O_WRONLY, 0600)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-
-		if _, err = f.WriteString(cronString); err != nil {
-			panic(err)
-		}
-		logMsg("CRON installed.")
-	}
-
-	if fileReader.FileExists("/etc/init/sysward-agent.conf") {
-		logMsg("+ Removing upstart config and converting to CRON job...")
-		runner.Run("/sbin/stop", "sysward-agent")
-		runner.Run("rm", "-rf", "/etc/init/sysward-agent.conf")
-		logMsg("+ Upstart configs removed and service stopped.")
-	}
-
+	// TODO: moving this into Startup() caused panics, investigate
 	CheckIfAgentIsRunning()
+	agent.InstallCron()
 	agent.Startup()
 
 	// set Protocol to https if getting a 301 moved

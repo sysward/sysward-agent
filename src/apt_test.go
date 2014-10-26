@@ -23,7 +23,6 @@ func TestPackagesThatNeedUpdates(t *testing.T) {
 			r.Mock.AssertExpectations(t)
 		})
 	})
-
 }
 
 func TestChangeLog(t *testing.T) {
