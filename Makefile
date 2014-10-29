@@ -1,9 +1,9 @@
 all: test
 
-test: 
+test:
 	go test -v ./...
 
-build_agent: 
+build_agent:
 	./build.sh
 
 
@@ -15,4 +15,3 @@ release: build_agent bump_version push
 
 push:
 	scp sysward version sysward@web1.sysward.com:~/updates/public
-
