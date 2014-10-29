@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sysward_agent/src/logging"
 )
 
 type DebianPackageManager struct{}
@@ -19,9 +20,9 @@ func (pm DebianPackageManager) UpdatePackage(pkg string) error {
 		debugMsg := strings.Join([]string{"apt-get",
 			"-y",
 			"install", pkg}, " ")
-		logMsg("Command: " + debugMsg)
+		logging.LogMsg("Command: " + debugMsg)
 	}
-	logMsg(string(out))
+	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
 	}
@@ -30,7 +31,7 @@ func (pm DebianPackageManager) UpdatePackage(pkg string) error {
 
 func (pm DebianPackageManager) HoldPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "hold", pkg)
-	logMsg(string(out))
+	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
 	}
@@ -39,7 +40,7 @@ func (pm DebianPackageManager) HoldPackage(pkg string) error {
 
 func (pm DebianPackageManager) UnholdPackage(pkg string) error {
 	out, err := runner.Run("apt-mark", "unhold", pkg)
-	logMsg(string(out))
+	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
 	}

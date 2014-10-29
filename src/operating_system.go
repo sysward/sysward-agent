@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sysward_agent/src/logging"
 )
 
 func getSystemUID() string {
@@ -20,7 +21,7 @@ func getSystemUID() string {
 				continue
 			}
 			if os.Getenv("DEBUG") == "true" {
-				logMsg("Name: " + ifdev.Name + " <-> HWADDR: " + ifdev.HardwareAddr.String())
+				logging.LogMsg("Name: " + ifdev.Name + " <-> HWADDR: " + ifdev.HardwareAddr.String())
 			}
 			if s == ifdev.HardwareAddr.String() {
 				addToList = false
@@ -33,7 +34,7 @@ func getSystemUID() string {
 
 	uid := strings.Join(uuid, ".")
 	if os.Getenv("DEBUG") == "true" {
-		logMsg("UID: " + uid)
+		logging.LogMsg("UID: " + uid)
 	}
 	return strings.TrimSpace(string(uid))
 }
@@ -46,7 +47,7 @@ func checkPreReqs() {
 		if err != nil {
 			panic(err)
 		}
-		logMsg(out)
+		logging.LogMsg(out)
 	}
 }
 
@@ -61,7 +62,7 @@ func verifyRoot() string {
 	if user != "root" {
 		panic("patchasaurus client must be run as root.")
 	}
-	logMsg("root verified")
+	logging.LogMsg("root verified")
 	return user
 }
 

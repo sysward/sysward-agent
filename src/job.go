@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sysward_agent/src/logging"
 )
 
 type Job struct {
@@ -16,7 +17,7 @@ func (job *Job) run() {
 	var err error
 
 	if job.JobType == "upgrade-package" {
-		logMsg(fmt.Sprintf("[apt] upgrading: %s", job.PackageName))
+		logging.LogMsg(fmt.Sprintf("[apt] upgrading: %s", job.PackageName))
 		err = packageManager.UpdatePackage(job.PackageName)
 	} else if job.JobType == "hold-package" {
 		err = packageManager.HoldPackage(job.PackageName)
@@ -27,18 +28,18 @@ func (job *Job) run() {
 	}
 
 	if err != nil {
-		logMsg(err.Error())
+		logging.LogMsg(err.Error())
 		api.JobFailure(*job, err.Error())
 
 	} else {
-		logMsg(fmt.Sprintf("[job] Posting back for job: %d", job.JobId))
+		logging.LogMsg(fmt.Sprintf("[job] Posting back for job: %d", job.JobId))
 		api.JobPostBack(*job)
 	}
 }
 
 func runAllJobs(jobs []Job) {
 	for index, job := range jobs {
-		logMsg(fmt.Sprintf("Running job %d", index))
+		logging.LogMsg(fmt.Sprintf("Running job %d", index))
 		job.run()
 	}
 }
@@ -48,7 +49,7 @@ func getJobs(config ConfigSettings) []Job {
 
 	jobsResponse := api.GetJobs()
 
-	logMsg(jobsResponse)
+	logging.LogMsg(jobsResponse)
 	if jobsResponse == "{}" || jobsResponse == "" {
 		return jobs
 	} else {
