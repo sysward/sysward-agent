@@ -34,15 +34,19 @@ func TestAgentCronInstall(t *testing.T) {
 		// TODO: Interface out the cron installation
 		Convey("Cron is not installed, upstart config exists", func() {
 			r := new(MockRunner)
+			w := new(MockWriter)
+			w.On("AppendToFile", "/etc/crontab", "*/5 * * * * root cd /opt/sysward/bin && ./sysward >> /dev/null\n").Return()
 			r.On("Run", "/sbin/stop", []string{"sysward-agent"}).Return("", nil)
 			r.On("Run", "rm", []string{"-rf", "/etc/init/sysward-agent.conf"}).Return("", nil)
-			f.On("ReadFile", "/etc/crontab").Return([]byte("bin && ./sysward"), nil)
+			f.On("ReadFile", "/etc/crontab").Return([]byte(""), nil)
 			f.On("FileExists", "/etc/init/sysward-agent.conf").Return(true)
 			fileReader = f
+			fileWriter = w
 			runner = r
 			agent.InstallCron()
 			f.Mock.AssertExpectations(t)
 			r.Mock.AssertExpectations(t)
+			w.Mock.AssertExpectations(t)
 		})
 	})
 }

@@ -19,6 +19,16 @@ func (r *MockRunner) Run(command string, args ...string) (string, error) {
 	return _args.String(0), _args.Error(1)
 }
 
+/* Mock writer for writing to files */
+type MockWriter struct {
+	mock.Mock
+}
+
+func (r *MockWriter) AppendToFile(path string, contents string) {
+	r.Mock.Called(path, contents)
+	return
+}
+
 /* Mocked calls for reading files and checking if files exist */
 type MockReader struct {
 	mock.Mock

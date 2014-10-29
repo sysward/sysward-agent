@@ -32,6 +32,7 @@ func logMsg(msg string) {
 type Agent struct {
 	runner         Runner
 	fileReader     SystemFileReader
+	fileWriter     SystemFileWriter
 	packageManager SystemPackageManager
 	api            WebApi
 }
@@ -40,11 +41,13 @@ func NewAgent() *Agent {
 	agent := Agent{
 		runner:         SyswardRunner{},
 		fileReader:     SyswardFileReader{},
+		fileWriter:     SyswardFileWriter{},
 		packageManager: DebianPackageManager{},
 		api:            SyswardApi{httpClient: GetHttpClient()},
 	}
 	runner = agent.runner
 	fileReader = agent.fileReader
+	fileWriter = agent.fileWriter
 	packageManager = agent.packageManager
 	api = agent.api
 	return &agent
@@ -144,15 +147,7 @@ func (a *Agent) InstallCron() {
 		logMsg("+ Cron already installed")
 	} else {
 		logMsg("+ CRON missing - installing")
-		f, err := os.OpenFile("/etc/crontab", os.O_APPEND|os.O_WRONLY, 0600)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-
-		if _, err = f.WriteString(cronString); err != nil {
-			panic(err)
-		}
+		fileWriter.AppendToFile("/etc/crontab", cronString)
 		logMsg("CRON installed.")
 	}
 
@@ -167,6 +162,7 @@ func (a *Agent) InstallCron() {
 var config Config
 var runner Runner
 var fileReader SystemFileReader
+var fileWriter SystemFileWriter
 var packageManager SystemPackageManager
 var api WebApi
 
