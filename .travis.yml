@@ -7,8 +7,9 @@ install:
   - go get github.com/robertkrimen/gxc/gxc
   - go get code.google.com/p/go.tools/cmd/cover
   - go get github.com/mattn/goveralls
-  - go get github.com/sysward/sysward-agent
 
 script:
+  - mv $HOME/gopath/src/github.com/sysward/sysward-agent $HOME/gopath/src/github.com/sysward/sysward_agent
+  - cd $HOME/gopath/src/github.com/sysward/sysward_agent
   - ./cover.sh
   - $HOME/gopath/bin/goveralls -coverprofile=profile.cov -service=travis-ci -repotoken $COVERALLS_TOKEN
