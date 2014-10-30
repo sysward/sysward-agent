@@ -10,7 +10,6 @@ install:
   - go get github.com/bradfitz/goimports
 
 script:
-  - mv $HOME/gopath/src/github.com/sysward/sysward-agent $HOME/gopath/src/github.com/sysward/sysward_agent
-  - cd $HOME/gopath/src/github.com/sysward/sysward_agent
+  - cp -r $HOME/gopath/src/github.com/sysward/sysward_agent $HOME/gopath/src/sysward_agent
   - ./cover.sh
   - $HOME/gopath/bin/goveralls -coverprofile=profile.cov -service=travis-ci -repotoken $COVERALLS_TOKEN
