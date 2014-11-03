@@ -14,6 +14,7 @@ import (
 	"time"
 
 	//	"./debian"
+
 	"sysward_agent/src/logging"
 )
 
@@ -23,15 +24,23 @@ type Agent struct {
 	fileWriter     SystemFileWriter
 	packageManager SystemPackageManager
 	api            WebApi
+	linux          string
 }
 
 func NewAgent() *Agent {
-	agent := Agent{
-		runner:         SyswardRunner{},
-		fileReader:     SyswardFileReader{},
-		fileWriter:     SyswardFileWriter{},
-		packageManager: DebianPackageManager{},
-		api:            SyswardApi{httpClient: GetHttpClient()},
+	agent = Agent{
+		runner:     SyswardRunner{},
+		fileReader: SyswardFileReader{},
+		fileWriter: SyswardFileWriter{},
+		api:        SyswardApi{httpClient: GetHttpClient()},
+	}
+
+	if agent.fileReader.FileExists("/usr/bin/apt") {
+		agent.packageManager = DebianPackageManager{}
+		agent.linux = "debian"
+	} else if agent.fileReader.FileExists("/usr/bin/yum") {
+		agent.packageManager = CentosPackageManager{}
+		agent.linux = "centos"
 	}
 	runner = agent.runner
 	fileReader = agent.fileReader
@@ -153,6 +162,7 @@ var fileReader SystemFileReader
 var fileWriter SystemFileWriter
 var packageManager SystemPackageManager
 var api WebApi
+var agent Agent
 
 func CurrentVersion() int {
 	return 31
@@ -196,7 +206,7 @@ func CheckIfAgentIsRunning() {
 	out := strings.Split(procList, "\n")
 	counter := 0
 	for _, proc := range out {
-		if strings.Contains(proc, "./sysward") && !strings.Contains(proc, "cd") {
+		if strings.Contains(proc, "./sysward") && !strings.Contains(proc, "cd") && !strings.Contains(proc, "sudo") {
 			counter++
 		}
 	}

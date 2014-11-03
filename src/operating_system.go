@@ -40,14 +40,25 @@ func getSystemUID() string {
 }
 
 func checkPreReqs() {
-	if !fileReader.FileExists("/usr/lib/update-notifier/apt-check") {
-		fmt.Println("update notifier not found, installing")
-		_, err := runner.Run("apt-get", "update")
-		out, err := runner.Run("apt-get", "install", "update-notifier", "-y")
-		if err != nil {
-			panic(err)
+	if agent.linux == "debian" {
+		if !fileReader.FileExists("/usr/lib/update-notifier/apt-check") {
+			fmt.Println("update notifier not found, installing")
+			_, err := runner.Run("apt-get", "update")
+			out, err := runner.Run("apt-get", "install", "update-notifier", "-y")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
 		}
-		logging.LogMsg(out)
+	} else if agent.linux == "centos" {
+		if !fileReader.FileExists("/usr/bin/lsb_release") {
+			fmt.Println("lsb_release not found, installing")
+			out, err := runner.Run("yum", "install", "-y", "redhat-lsb-core")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
 	}
 }
 
@@ -60,7 +71,7 @@ func verifyRoot() string {
 
 	user := strings.TrimSpace(string(usr))
 	if user != "root" {
-		panic("patchasaurus client must be run as root.")
+		panic("SysWard agent must be run as root or as sudo.")
 	}
 	logging.LogMsg("root verified")
 	return user
