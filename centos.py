@@ -1,4 +1,5 @@
 #!/bin/env python
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -34,6 +35,7 @@ try:
 finally:
     base_cli.closeRpmDB()
     base_cli.doUnlock()
+
 # Build list of updated packages info
 updates_info = []
 for pkg in sorted(updates):
@@ -49,14 +51,8 @@ for pkg in sorted(updates):
     updates_info.append(info)
 
 # Dump and print list of info
-# dump = json.dumps(updates_info)
-
-sys.stdout.close()
-sys.stderr.close()
+dump = json.dumps(updates_info)
 
 sys.stdout = _stdout
 sys.stderr = _stderr
-if not updates_info:
-  print "[]"
-else:
-  print json.dumps(updates_info)
+print dump

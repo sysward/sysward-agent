@@ -82,11 +82,12 @@ func (pm CentosPackageManager) BuildInstalledPackageList() []string {
 }
 
 func (pm CentosPackageManager) BuildPackageList() []OsPackage {
-	out, err := runner.Run("python", "yum.py")
-	if err != nil {
-		panic(err)
-	}
+	out, err := runner.Run("python", "centos.py")
 	var packages []OsPackage
+
+	if out == "" {
+		return packages
+	}
 
 	err = json.Unmarshal([]byte(out), &packages)
 	if err != nil {
