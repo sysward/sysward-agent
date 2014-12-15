@@ -12,13 +12,13 @@ import (
 type CentosPackageManager struct{}
 
 func (pm CentosPackageManager) UpdatePackage(pkg string) error {
-	out, err := runner.Run("apt-get",
-		"-y",
-		"install", pkg)
+	out, err := runner.Run("yum",
+		"update",
+		"-y", pkg)
 	if os.Getenv("DEBUG") == "true" {
-		debugMsg := strings.Join([]string{"apt-get",
-			"-y",
-			"install", pkg}, " ")
+		debugMsg := strings.Join([]string{"yum",
+			"update",
+			"-y", pkg}, " ")
 		logging.LogMsg("Command: " + debugMsg)
 	}
 	logging.LogMsg(string(out))
@@ -62,27 +62,31 @@ func (pm CentosPackageManager) GetSourcesList() []Source {
 }
 
 func (pm CentosPackageManager) GetChangelog(package_name string) string {
-	changelog, _ := runner.Run("apt-get", "changelog", package_name)
+	changelog, _ := runner.Run("yum", "changelog", package_name)
 	changelog_encoded := base64.StdEncoding.EncodeToString([]byte(changelog))
 	return changelog_encoded
 }
 
 func (pm CentosPackageManager) BuildInstalledPackageList() []string {
-	installed, _ := runner.Run("dpkg", "--get-selections")
-	installed_arr := strings.Split(string(installed), "\n")
+	installed, _ := runner.Run("yum", "-q", "list", "installed")
+	installed_arr := strings.Split(string(installed), "\n")[1:]
 	packages := []string{}
 	for _, line := range installed_arr {
-		x := strings.Split(line, "\u0009")
-		if x[0] == "" {
+		x := strings.Fields(line)
+		if len(x) == 0 {
 			continue
 		}
-		packages = append(packages, x[0])
+		if x[0] == "" || x[0] == "@updates" {
+			continue
+		}
+		pkg_name := strings.Split(x[0], ".")[0]
+		packages = append(packages, pkg_name)
 	}
 	return packages
 }
 
 func (pm CentosPackageManager) BuildPackageList() []OsPackage {
-	out, err := runner.Run("python", "centos.py")
+	out, err := runner.Run("python", "list_updates.py")
 	var packages []OsPackage
 
 	if out == "" {

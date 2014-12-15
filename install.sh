@@ -10,6 +10,7 @@ echo "+ Downloading agent config"
 wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/config.deploy.json
 echo "+ Downloading python package reader"
 wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/trex.py
+wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/list_updates.py
 
 chmod +x sysward
 echo "+ Moving config into place"

@@ -35,7 +35,7 @@ func NewAgent() *Agent {
 		api:        SyswardApi{httpClient: GetHttpClient()},
 	}
 
-	if agent.fileReader.FileExists("/usr/bin/apt") {
+	if agent.fileReader.FileExists("/etc/apt") {
 		agent.packageManager = DebianPackageManager{}
 		agent.linux = "debian"
 	} else if agent.fileReader.FileExists("/usr/bin/yum") {
@@ -76,32 +76,36 @@ func GetHttpClient() *http.Client {
 }
 
 func PingApi() {
-	for {
-		client := GetHttpClient()
-		data := url.Values{}
-		data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
+	client := GetHttpClient()
+	data := url.Values{}
+	data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
 
-		req, err := http.NewRequest("POST", config.agentPingUrl(), bytes.NewBufferString(data.Encode()))
-		if err != nil {
-			logging.LogMsg(fmt.Sprintf("[fatal ping]: %s", err))
-			time.Sleep(15 * time.Second)
-			continue
-		}
-		req.Header.Add("X-Sysward-Uid", getSystemUID())
-		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-		req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	req, err := http.NewRequest("POST", config.agentPingUrl(), bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		logging.LogMsg(fmt.Sprintf("[fatal ping]: %s", err))
+		return
+	}
+	req.Header.Add("X-Sysward-Uid", getSystemUID())
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
-		_, err = client.Do(req)
-		if err != nil {
-			logging.LogMsg(fmt.Sprintf("[fatal ping]: %s", err))
-		}
-		logging.LogMsg("[pinging api]")
-		time.Sleep(15 * time.Second)
+	_, err = client.Do(req)
+	if err != nil {
+		logging.LogMsg(fmt.Sprintf("[fatal ping]: %s", err))
 	}
 }
 
 func (a *Agent) Run() {
-	go PingApi()
+	var err error
+	ticker := time.NewTicker(15 * time.Second)
+	go func() {
+		for t := range ticker.C {
+			logging.LogMsg(fmt.Sprintf("pinging %s", t))
+			PingApi()
+			logging.LogMsg(fmt.Sprintf("finished pinging %s", t))
+		}
+	}()
+
 	CheckForUpdate()
 
 	logging.LogMsg("package list update - start")
@@ -131,7 +135,7 @@ func (a *Agent) Run() {
 		InstalledPackages: installedPackages,
 	}
 
-	err := api.CheckIn(agentData)
+	err = api.CheckIn(agentData)
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 	}
@@ -165,7 +169,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 31
+	return 32
 }
 
 func CheckForUpdate() {
