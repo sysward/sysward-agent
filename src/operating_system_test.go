@@ -19,13 +19,18 @@ func TestPrereqs(t *testing.T) {
 
 	Convey("Given pre-req's are installed", t, func() {
 		f := new(MockReader)
+		agent := NewAgent()
+		agent.linux = "debian"
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		fileReader = f
 		So(func() { checkPreReqs() }, ShouldNotPanic)
+		// here
 		f.Mock.AssertExpectations(t)
 	})
 
 	Convey("Given pre-req's aren't installed", t, func() {
+		agent := NewAgent()
+		agent.linux = "debian"
 		r := new(MockRunner)
 		f := new(MockReader)
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
@@ -33,6 +38,7 @@ func TestPrereqs(t *testing.T) {
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
 		fileReader = f
 		runner = r
+		// here
 		checkPreReqs()
 		f.Mock.AssertExpectations(t)
 		r.Mock.AssertExpectations(t)

@@ -11,8 +11,20 @@ import (
 )
 
 func TestNewAgent(t *testing.T) {
-	Convey("Setting up a new agent", t, func() {
+	Convey("Setting up a new agent on Ubuntu", t, func() {
+		f := new(MockReader)
+		f.On("FileExists", "/etc/apt").Return(true)
+		r := new(MockRunner)
+		r.On("Run", "whoami", []string{}).Return("root", nil)
 		agent := NewAgent()
+		runner = r
+		config_json, _ := ioutil.ReadFile("../config.json")
+		f.On("ReadFile", "config.json").Return(config_json, nil)
+		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
+		f.On("FileExists", "/etc/apt").Return(true)
+		f.On("ReadFile", "config.json").Return(config_json, nil)
+		fileReader = f
+		agent.Startup()
 		So(agent.runner, ShouldHaveSameTypeAs, SyswardRunner{})
 		So(agent.fileReader, ShouldHaveSameTypeAs, SyswardFileReader{})
 		So(agent.packageManager, ShouldHaveSameTypeAs, DebianPackageManager{})
@@ -61,12 +73,13 @@ func TestAgentStartup(t *testing.T) {
 		r := new(MockRunner)
 		f := new(MockReader)
 		r.On("Run", "whoami", []string{}).Return("root", nil)
-		runner = r
 		config_json, _ := ioutil.ReadFile("../config.json")
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
+		f.On("FileExists", "/etc/apt").Return(true)
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		agent := NewAgent()
+		runner = r
 		fileReader = f
-		agent := Agent{}
 		agent.Startup()
 		api = SyswardApi{httpClient: &http.Client{}}
 		f.Mock.AssertExpectations(t)

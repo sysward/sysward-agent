@@ -34,18 +34,9 @@ func NewAgent() *Agent {
 		fileWriter: SyswardFileWriter{},
 		api:        SyswardApi{httpClient: GetHttpClient()},
 	}
-
-	if agent.fileReader.FileExists("/etc/apt") {
-		agent.packageManager = DebianPackageManager{}
-		agent.linux = "debian"
-	} else if agent.fileReader.FileExists("/usr/bin/yum") {
-		agent.packageManager = CentosPackageManager{}
-		agent.linux = "centos"
-	}
 	runner = agent.runner
 	fileReader = agent.fileReader
 	fileWriter = agent.fileWriter
-	packageManager = agent.packageManager
 	api = agent.api
 	return &agent
 }
@@ -54,6 +45,17 @@ var interval *time.Duration
 
 func (a *Agent) Startup() {
 	verifyRoot()
+
+	if fileReader.FileExists("/etc/apt") {
+		a.packageManager = DebianPackageManager{}
+		a.linux = "debian"
+	} else if fileReader.FileExists("/usr/bin/yum") {
+		a.packageManager = CentosPackageManager{}
+		a.linux = "centos"
+	}
+
+	packageManager = agent.packageManager
+
 	checkPreReqs()
 	logging.LogMsg("pre-reqs verified")
 	configSettings := NewConfig("config.json")
