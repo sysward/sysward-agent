@@ -98,6 +98,8 @@ func PingApi() {
 }
 
 func (a *Agent) Run() {
+	// initial ping
+	PingApi()
 	var err error
 	ticker := time.NewTicker(15 * time.Second)
 	go func() {
@@ -171,7 +173,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 32
+	return 35
 }
 
 func CheckForUpdate() {
