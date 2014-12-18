@@ -43,6 +43,7 @@ func TestPackageUpdates(t *testing.T) {
 		Convey("The package should be upgraded", func() {
 			r := new(MockRunner)
 			r.On("Run", "apt-get", []string{"-y",
+				"--force-confold",
 				"install",
 				"apt"}).Return("", nil)
 			runner = r
@@ -54,6 +55,7 @@ func TestPackageUpdates(t *testing.T) {
 		Convey("The package should not upgrade if held", func() {
 			r := new(MockRunner)
 			r.On("Run", "apt-get", []string{"-y",
+				"--force-confold",
 				"install",
 				"apt"}).Return("", errors.New("fail"))
 			runner = r

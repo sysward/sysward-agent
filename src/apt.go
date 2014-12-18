@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -13,13 +14,17 @@ import (
 type DebianPackageManager struct{}
 
 func (pm DebianPackageManager) UpdatePackage(pkg string) error {
-	out, err := runner.Run("apt-get",
-		"-y",
-		"install", pkg)
+
+	// apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install apt
+	command := fmt.Sprintf("apt-get install -y -o Dpkg::Options::=%+q -o Dpkg::Options::=%+q %s",
+		"--force-confdef", "--force-confold", pkg)
+	out, err := runner.Run("/bin/bash",
+		"-c",
+		command,
+	)
 	if os.Getenv("DEBUG") == "true" {
-		debugMsg := strings.Join([]string{"apt-get",
-			"-y",
-			"install", pkg}, " ")
+		debugMsg := strings.Join([]string{"/bin/bash",
+			"-c", command}, " ")
 		logging.LogMsg("Command: " + debugMsg)
 	}
 	logging.LogMsg(string(out))
