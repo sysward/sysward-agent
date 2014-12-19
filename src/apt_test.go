@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -42,9 +43,13 @@ func TestPackageUpdates(t *testing.T) {
 
 		Convey("The package should be upgraded", func() {
 			r := new(MockRunner)
-			r.On("Run", "apt-get", []string{"-y",
-				"--force-confold",
+			r.On("Run", "apt-get", []string{
 				"install",
+				"-y",
+				"-o",
+				fmt.Sprintf("Dpkg::Options::=--force-confdef"),
+				"-o",
+				fmt.Sprintf("Dpkg::Options::=--force-confold"),
 				"apt"}).Return("", nil)
 			runner = r
 			err := packageManager.UpdatePackage("apt")
@@ -54,9 +59,13 @@ func TestPackageUpdates(t *testing.T) {
 
 		Convey("The package should not upgrade if held", func() {
 			r := new(MockRunner)
-			r.On("Run", "apt-get", []string{"-y",
-				"--force-confold",
+			r.On("Run", "apt-get", []string{
 				"install",
+				"-y",
+				"-o",
+				fmt.Sprintf("Dpkg::Options::=--force-confdef"),
+				"-o",
+				fmt.Sprintf("Dpkg::Options::=--force-confold"),
 				"apt"}).Return("", errors.New("fail"))
 			runner = r
 			err := packageManager.UpdatePackage("apt")

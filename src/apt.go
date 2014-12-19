@@ -14,20 +14,18 @@ import (
 type DebianPackageManager struct{}
 
 func (pm DebianPackageManager) UpdatePackage(pkg string) error {
-
-	// apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install apt
-	command := fmt.Sprintf("apt-get install -y -o Dpkg::Options::=%+q -o Dpkg::Options::=%+q %s",
-		"--force-confdef", "--force-confold", pkg)
-	out, err := runner.Run("/bin/bash",
-		"-c",
-		command,
+	out, err := runner.Run("apt-get",
+		"install",
+		"-y",
+		"-o",
+		fmt.Sprintf("Dpkg::Options::=--force-confdef"),
+		"-o",
+		fmt.Sprintf("Dpkg::Options::=--force-confold"),
+		pkg,
 	)
 	if os.Getenv("DEBUG") == "true" {
-		debugMsg := strings.Join([]string{"/bin/bash",
-			"-c", command}, " ")
-		logging.LogMsg("Command: " + debugMsg)
+		logging.LogMsg(string(out))
 	}
-	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
 	}
