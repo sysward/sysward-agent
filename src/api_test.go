@@ -21,7 +21,7 @@ func TestCheckIn(t *testing.T) {
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("agentCheckinUrl").Return(server.URL)
 		config = c
@@ -33,39 +33,45 @@ func TestCheckIn(t *testing.T) {
 
 func TestApiJobFailure(t *testing.T) {
 	Convey("Job failure should send the job data to the server", t, func() {
+		postedBody := ""
 		handler := func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			body, _ := ioutil.ReadAll(r.Body)
-			So(string(body), ShouldEqual, `{"job_id":1,"status":"failure","error_message":"failed"}`)
+			postedBody = string(body)
 			w.WriteHeader(200)
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("fetchJobPostbackUrl").Return(server.URL)
 		config = c
-
 		api.JobFailure(Job{JobId: 1}, "failed")
+
+		c.Mock.AssertExpectations(t)
+		So(postedBody, ShouldEqual, `{"job_id":1,"status":"failure","error_message":"failed"}`)
 	})
 }
 
 func TestApiJobPostBack(t *testing.T) {
 	Convey("Accepting a job post back", t, func() {
+		postedBody := ""
 		handler := func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			body, _ := ioutil.ReadAll(r.Body)
-			So(string(body), ShouldEqual, `{"job_id":1,"status":"success"}`)
+			postedBody = string(body)
 			w.WriteHeader(200)
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("fetchJobPostbackUrl").Return(server.URL)
 		config = c
-
 		api.JobPostBack(Job{JobId: 1})
+		c.Mock.AssertExpectations(t)
+		So(postedBody, ShouldEqual, `{"job_id":1,"status":"success"}`)
+		server.Close()
 	})
 }
 
@@ -77,7 +83,7 @@ func TestApiCheckIn(t *testing.T) {
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("fetchJobUrl", getSystemUID()).Return(server.URL)
 		config = c
@@ -95,7 +101,7 @@ func TestApiCheckIn(t *testing.T) {
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("fetchJobUrl", getSystemUID()).Return(server.URL)
 		config = c
@@ -111,7 +117,7 @@ func TestApiCheckIn(t *testing.T) {
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
 		defer server.Close()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		c := new(MockConfig)
 		c.On("fetchJobUrl", getSystemUID()).Return(server.URL)
 		config = c

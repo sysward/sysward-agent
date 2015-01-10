@@ -68,12 +68,12 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func GetHttpClient() *http.Client {
+func GetHttpClient() http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		Dial:            dialTimeout,
 	}
-	client := &http.Client{Transport: tr}
+	client := http.Client{Transport: tr}
 	return client
 }
 

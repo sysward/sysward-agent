@@ -17,11 +17,11 @@ type WebApi interface {
 }
 
 type SyswardApi struct {
-	httpClient *http.Client
+	httpClient http.Client
 }
 
 func (r SyswardApi) CheckIn(agentData AgentData) error {
-	client := &r.httpClient
+	client := r.httpClient
 	logging.LogMsg("building json - start")
 	o, err := agentData.ToJson()
 	if err != nil {
@@ -50,7 +50,7 @@ func (r SyswardApi) CheckIn(agentData AgentData) error {
 }
 
 func (r SyswardApi) GetJobs() string {
-	client := &r.httpClient
+	client := r.httpClient
 	job_url := config.fetchJobUrl(getSystemUID())
 	jreq, err := client.Get(job_url)
 
@@ -73,7 +73,7 @@ func (r SyswardApi) GetJobs() string {
 
 func (r SyswardApi) JobFailure(job Job, error_string string) {
 	logging.LogMsg("Posting job FAIL")
-	client := &r.httpClient
+	client := r.httpClient
 	data := struct {
 		JobId        int    `json:"job_id"`
 		Status       string `json:"status"`
@@ -92,12 +92,13 @@ func (r SyswardApi) JobFailure(job Job, error_string string) {
 	req.Header.Add("X-Sysward-Uid", getSystemUID())
 	_, err = client.Do(req)
 	if err != nil {
+		fmt.Println("Error posting to: " + config.fetchJobPostbackUrl())
 		panic(err)
 	}
 }
 
 func (r SyswardApi) JobPostBack(job Job) {
-	client := &r.httpClient
+	client := r.httpClient
 	data := struct {
 		JobId  int    `json:"job_id"`
 		Status string `json:"status"`

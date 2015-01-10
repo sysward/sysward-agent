@@ -6,7 +6,7 @@ test:
 	go test -v ./...
 
 build_agent:
-	./build.sh
+	cd src && GOOS=linux CGO_ENABLED=0 go build -o ../sysward
 
 qa: build_agent
 	for host in $(HOSTS); do \

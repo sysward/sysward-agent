@@ -81,7 +81,7 @@ func TestAgentStartup(t *testing.T) {
 		runner = r
 		fileReader = f
 		agent.Startup()
-		api = SyswardApi{httpClient: &http.Client{}}
+		api = SyswardApi{httpClient: http.Client{}}
 		f.Mock.AssertExpectations(t)
 		r.Mock.AssertExpectations(t)
 	})
