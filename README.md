@@ -2,23 +2,4 @@
 
 # Sysward Agent
 
-# CentOS
-
-## Packages
-yum install yum-security yum-plugin-versionlock
-
-Update Package
-
-Hold Package
-
-Unhold Package
-
-Get Sources List
-
-// Get changelog
-
-List installed packages
-
-List packages that need updating
-
-Get update counts for regular/security
+For more information please visit https://sysward.com/
