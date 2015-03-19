@@ -15,7 +15,7 @@ import (
 
 	//	"./debian"
 
-	"sysward_agent/src/logging"
+	"github.com/sysward/logging"
 )
 
 type Agent struct {
@@ -143,6 +143,8 @@ func (a *Agent) Run() {
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 	}
+	ticker.Stop()
+	logging.LogMsg("Agent finished")
 }
 
 func (a *Agent) InstallCron() {
@@ -173,7 +175,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 36
+	return 38
 }
 
 func CheckForUpdate() {

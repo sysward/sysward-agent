@@ -1,0 +1,31 @@
+{
+	"ImportPath": "sysward_agent/src",
+	"GoVersion": "go1.4",
+	"Deps": [
+		{
+			"ImportPath": "github.com/jtolds/gls",
+			"Rev": "f1ac7f4f24f50328e6bc838ca4437d1612a0243c"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-357-gbf72d5d",
+			"Rev": "bf72d5d90ac6d3cbe0cf7b462ed60bd68f6d0cd1"
+		},
+		{
+			"ImportPath": "github.com/stretchr/objx",
+			"Rev": "cbeaeb16a013161a98496fad62933b1d21786672"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "2eaa4b48b8954bf871229043b8064ca156a542a5"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/mock",
+			"Rev": "2eaa4b48b8954bf871229043b8064ca156a542a5"
+		},
+		{
+			"ImportPath": "github.com/sysward/logging",
+			"Rev": "de6bd4df3aedee60b43307210b43eeff683a193f"
+		}
+	]
+}

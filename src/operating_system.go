@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/sysward/logging"
 	"net"
 	"os"
 	"runtime"
 	"strings"
-	"sysward_agent/src/logging"
 )
 
 func getSystemUID() string {
@@ -59,6 +59,16 @@ func checkPreReqs() {
 			}
 			logging.LogMsg(out)
 		}
+
+		if !fileReader.FileExists("/etc/yum/pluginconf.d/versionlock.conf") {
+			fmt.Println("yum-plugin-versionlock.noarch not found, installing")
+			out, err := runner.Run("yum", "install", "-y", "yum-plugin-versionlock.noarch")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
+
 	}
 }
 

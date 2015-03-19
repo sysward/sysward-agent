@@ -1,9 +1,8 @@
 package main
 
 import (
-	"testing"
-
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestSystemUid(t *testing.T) {

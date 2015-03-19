@@ -28,7 +28,6 @@ func TestCheckIn(t *testing.T) {
 
 		api.CheckIn(AgentData{})
 	})
-
 }
 
 func TestApiJobFailure(t *testing.T) {

@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sysward/logging"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"sysward_agent/src/logging"
 )
 
 type WebApi interface {

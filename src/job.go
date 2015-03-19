@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sysward_agent/src/logging"
+	"github.com/sysward/logging"
 )
 
 type Job struct {

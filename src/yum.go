@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/sysward/logging"
 	"os"
 	"strings"
-	"sysward_agent/src/logging"
 )
 
 type CentosPackageManager struct{}
@@ -29,7 +29,7 @@ func (pm CentosPackageManager) UpdatePackage(pkg string) error {
 }
 
 func (pm CentosPackageManager) HoldPackage(pkg string) error {
-	out, err := runner.Run("apt-mark", "hold", pkg)
+	out, err := runner.Run("yum", "versionlock", pkg)
 	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
@@ -38,7 +38,7 @@ func (pm CentosPackageManager) HoldPackage(pkg string) error {
 }
 
 func (pm CentosPackageManager) UnholdPackage(pkg string) error {
-	out, err := runner.Run("apt-mark", "unhold", pkg)
+	out, err := runner.Run("yum", "versionlock", "delete", pkg)
 	logging.LogMsg(string(out))
 	if err != nil {
 		err = errors.New(string(out) + err.Error())
@@ -68,7 +68,7 @@ func (pm CentosPackageManager) GetChangelog(package_name string) string {
 }
 
 func (pm CentosPackageManager) BuildInstalledPackageList() []string {
-	installed, _ := runner.Run("yum", "-q", "list", "installed")
+	installed, _ := runner.Run("rpm", "-qa", "--queryformat", "%{name}\t%{version}\n")
 	installed_arr := strings.Split(string(installed), "\n")[1:]
 	packages := []string{}
 	for _, line := range installed_arr {
@@ -76,11 +76,11 @@ func (pm CentosPackageManager) BuildInstalledPackageList() []string {
 		if len(x) == 0 {
 			continue
 		}
-		if x[0] == "" || x[0] == "@updates" {
+		if x[0] == "" {
 			continue
 		}
-		pkg_name := strings.Split(x[0], ".")[0]
-		packages = append(packages, pkg_name)
+		pkg_name := x[0]
+		packages = append(packages, strings.TrimSpace(pkg_name))
 	}
 	return packages
 }

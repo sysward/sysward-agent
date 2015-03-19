@@ -1,12 +1,26 @@
 SHELL=/bin/bash
 HOSTS = centos6 centos7 ubuntu12 ubuntu14
-all: test
+all: build
 
 test:
 	go test -v ./...
 
+build: deps test build_agent
+
+deps:
+	go get github.com/tools/godep
+	cd src && godep restore
+
 build_agent:
 	cd src && GOOS=linux CGO_ENABLED=0 go build -o ../sysward
+
+docker: docker_build docker_run
+
+docker_build:
+	docker build --tag="sysward/agent" .
+
+docker_run:
+	docker run -v `pwd`:/sysward sysward/agent
 
 qa: build_agent
 	for host in $(HOSTS); do \
