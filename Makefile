@@ -31,6 +31,9 @@ qa: build_agent
 bump_version:
 	ruby -e "f=File.read('version'); File.write('version', f.to_i+1); puts f.to_i+1"
 
+bump_agent_version:
+	ruby -e "f=File.read('src/sysward-agent.go'); v=File.read('version'); f.gsub!('return 38', 'return ' + v); File.write('src/sysward-agent.go', f);"
+
 release: build_agent bump_version push
 
 deploy:
