@@ -12,11 +12,11 @@ import (
 
 func TestCheckIn(t *testing.T) {
 	expected := `{"packages":null,"system_updates":{"regular":0,"security":0},"operating_system":{"name":"","uid":"","version":"","interfaces":null,"hostname":"","cpu_information":{"name":"","count":0},"memory_information":{"total":""}},"sources":null,"installed_packages":null}`
-	Convey("Checking in via the API", t, func() {
+	Convey("Checking in via the API", t, func(ctx C) {
 		handler := func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			body, _ := ioutil.ReadAll(r.Body)
-			So(string(body), ShouldEqual, expected)
+			ctx.So(string(body), ShouldEqual, expected)
 			w.WriteHeader(200)
 		}
 		server := httptest.NewServer(http.HandlerFunc(handler))
