@@ -12,7 +12,7 @@ deps:
 	cd src && godep restore
 
 build_agent:
-	cd src && GOOS=linux CGO_ENABLED=0 go build -o ../sysward
+	cd src && GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' -o ../sysward
 
 docker: docker_build docker_run
 
