@@ -73,6 +73,11 @@ func GetHttpClient() http.Client {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		Dial:            dialTimeout,
 	}
+	if os.Getenv("HTTPS_PROXY") != "" {
+		proxyUrl, _ := url.Parse(os.Getenv("HTTPS_PROXY"))
+		tr.Proxy = http.ProxyURL(proxyUrl)
+	}
+
 	client := http.Client{Transport: tr}
 	return client
 }
