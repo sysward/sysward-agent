@@ -108,7 +108,8 @@ func (pm DebianPackageManager) UpdatePackageLists() error {
 func (pm DebianPackageManager) UpdateCounts() Updates {
 	out, err := runner.Run("/usr/lib/update-notifier/apt-check")
 	if err != nil {
-		panic(err)
+		logging.LogMsg(err.Error())
+		return Updates{0, 0}
 	}
 	output := strings.TrimSpace(string(out))
 	ups := strings.Split(output, ";")

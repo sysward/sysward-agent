@@ -104,14 +104,20 @@ func PingApi() {
 
 func (a *Agent) Run() {
 	// initial ping
-	PingApi()
 	var err error
+	stopPing := make(chan bool)
 	ticker := time.NewTicker(15 * time.Second)
+
 	go func() {
 		for t := range ticker.C {
 			logging.LogMsg(fmt.Sprintf("pinging %s", t))
-			PingApi()
+			go PingApi()
 			logging.LogMsg(fmt.Sprintf("finished pinging %s", t))
+			select {
+			case <-stopPing:
+				logging.LogMsg("Channel stopped.")
+				return
+			}
 		}
 	}()
 
@@ -128,6 +134,9 @@ func (a *Agent) Run() {
 	runAllJobs(jobs)
 
 	logging.LogMsg("checking jobs - finish")
+
+	stopPing <- true
+	ticker.Stop()
 
 	counts := packageManager.UpdateCounts()
 	operatingSystem := getOsInformation()
@@ -148,7 +157,6 @@ func (a *Agent) Run() {
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 	}
-	ticker.Stop()
 	logging.LogMsg("Agent finished")
 }
 
@@ -184,6 +192,9 @@ func CurrentVersion() int {
 }
 
 func CheckForUpdate() {
+	if os.Getenv("SKIP_UPDATES") == "true" {
+		return
+	}
 	version := CurrentVersion()
 	resp, err := http.Get("http://updates.sysward.com/version")
 	if err != nil {
