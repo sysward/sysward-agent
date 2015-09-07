@@ -83,6 +83,7 @@ func GetHttpClient() http.Client {
 }
 
 func PingApi() {
+	logging.LogMsg(fmt.Sprintf("pinging %s", time.Now()))
 	client := GetHttpClient()
 	data := url.Values{}
 	data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
@@ -100,32 +101,36 @@ func PingApi() {
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal ping]: %s", err))
 	}
+	logging.LogMsg(fmt.Sprintf("finished pinging %s", time.Now()))
 }
 
 func (a *Agent) Run() {
 	// initial ping
 	var err error
-	stopPing := make(chan bool)
-	ticker := time.NewTicker(15 * time.Second)
+	//stopPing := make(chan bool)
+	//ticker := time.NewTicker(15 * time.Second)
 
-	go func() {
-		for t := range ticker.C {
-			logging.LogMsg(fmt.Sprintf("pinging %s", t))
-			go PingApi()
-			logging.LogMsg(fmt.Sprintf("finished pinging %s", t))
-			select {
-			case <-stopPing:
-				logging.LogMsg("Channel stopped.")
-				return
-			}
-		}
-	}()
+	//go func() {
+	//	for t := range ticker.C {
+	//		logging.LogMsg(fmt.Sprintf("pinging %s", t))
+	//		go PingApi()
+	//		logging.LogMsg(fmt.Sprintf("finished pinging %s", t))
+	//		select {
+	//		case <-stopPing:
+	//			logging.LogMsg("Channel stopped.")
+	//			return
+	//		}
+	//	}
+	//}()
 
 	CheckForUpdate()
+	PingApi()
 
 	logging.LogMsg("package list update - start")
 	packageManager.UpdatePackageLists()
+
 	logging.LogMsg("package list update - finish")
+	PingApi()
 
 	logging.LogMsg("checking jobs - start")
 
@@ -135,8 +140,8 @@ func (a *Agent) Run() {
 
 	logging.LogMsg("checking jobs - finish")
 
-	stopPing <- true
-	ticker.Stop()
+	//stopPing <- true
+	//ticker.Stop()
 
 	counts := packageManager.UpdateCounts()
 	operatingSystem := getOsInformation()
@@ -188,7 +193,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 38
+	return 50
 }
 
 func CheckForUpdate() {

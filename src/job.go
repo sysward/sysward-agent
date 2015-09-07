@@ -41,6 +41,7 @@ func runAllJobs(jobs []Job) {
 	for index, job := range jobs {
 		logging.LogMsg(fmt.Sprintf("Running job %d", index))
 		job.run()
+		PingApi()
 	}
 }
 
