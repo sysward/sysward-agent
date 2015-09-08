@@ -177,7 +177,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 50
+	return 38
 }
 
 func CheckForUpdate() {
