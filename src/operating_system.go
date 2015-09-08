@@ -120,6 +120,11 @@ func getInterfaceInformation() []Interface {
 	iflist := make([]Interface, len(interface_list))
 	for index, ifdev := range interface_list {
 		ips, _ := ifdev.Addrs()
+		// skip interfaces that are from docker
+		if strings.Contains(ifdev.Name, "veth") {
+			logging.LogMsg(fmt.Sprintf("Skipping: %+v", ifdev))
+			continue
+		}
 		ip_list := make([]string, len(ips))
 		for c, ip := range ips {
 			ip_list[c] = ip.String()

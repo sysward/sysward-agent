@@ -52,6 +52,9 @@ func (a *Agent) Startup() {
 	} else if fileReader.FileExists("/usr/bin/yum") {
 		a.packageManager = CentosPackageManager{}
 		a.linux = "centos"
+	} else if fileReader.FileExists("/usr/bin/zypper") {
+		a.packageManager = ZypperPackageManager{}
+		a.linux = "suse"
 	}
 
 	packageManager = agent.packageManager
@@ -105,23 +108,7 @@ func PingApi() {
 }
 
 func (a *Agent) Run() {
-	// initial ping
 	var err error
-	//stopPing := make(chan bool)
-	//ticker := time.NewTicker(15 * time.Second)
-
-	//go func() {
-	//	for t := range ticker.C {
-	//		logging.LogMsg(fmt.Sprintf("pinging %s", t))
-	//		go PingApi()
-	//		logging.LogMsg(fmt.Sprintf("finished pinging %s", t))
-	//		select {
-	//		case <-stopPing:
-	//			logging.LogMsg("Channel stopped.")
-	//			return
-	//		}
-	//	}
-	//}()
 
 	CheckForUpdate()
 	PingApi()
@@ -139,9 +126,6 @@ func (a *Agent) Run() {
 	runAllJobs(jobs)
 
 	logging.LogMsg("checking jobs - finish")
-
-	//stopPing <- true
-	//ticker.Stop()
 
 	counts := packageManager.UpdateCounts()
 	operatingSystem := getOsInformation()
@@ -193,7 +177,7 @@ var api WebApi
 var agent Agent
 
 func CurrentVersion() int {
-	return 50
+	return 38
 }
 
 func CheckForUpdate() {

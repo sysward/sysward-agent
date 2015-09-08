@@ -13,7 +13,7 @@ func TestBuildingAConfig(t *testing.T) {
 		configSettings := NewConfig("../config.json")
 		config = SyswardConfig{AgentConfig: configSettings}
 		Convey("The host should be set", func() {
-			So(config.Config().Host, ShouldEqual, "10.0.2.2:5000")
+			So(config.Config().Host, ShouldEqual, "192.168.1.57:3000")
 		})
 
 		Convey("The protocol should be http", func() {
