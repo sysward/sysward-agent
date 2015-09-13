@@ -1,0 +1,860 @@
+go test -v ./...
+=== RUN   TestNewAgent
+
+  Setting up a new agent on Ubuntu [32m✔[0m[32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[32m
+3 assertions thus far[0m
+
+--- PASS: TestNewAgent (0.00s)
+=== RUN   TestAgentCronInstall
+
+  Cron job must be installed 
+    Cron is already installed, upstart config doesnt exist 
+    Cron is not installed, upstart config exists 
+
+[31m[0m[33m[0m[32m
+3 assertions thus far[0m
+
+--- PASS: TestAgentCronInstall (0.00s)
+	mock.go:264: ✅	ReadFile(string)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	ReadFile(string)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	AppendToFile(string,string)
+=== RUN   TestAgentStartup
+
+  Agent startup should verify root and check pre-req packages 
+
+[31m[0m[33m[0m[32m
+3 assertions thus far[0m
+
+--- PASS: TestAgentStartup (0.00s)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	ReadFile(string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestIfAgentIsRunning
+
+  Checking if the agent is running 
+    Agent is running [32m✔[0m
+    Agent isn't running [32m✔[0m
+
+[31m[0m[33m[0m[32m
+5 assertions thus far[0m
+
+--- PASS: TestIfAgentIsRunning (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestAgentRun
+
+  Agent run should checkin, and gather system information [31m🔥[0m
+
+[31m
+Errors:
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go 
+  Line 18: - 
+  
+  mock: Unexpected Method Call
+  -----------------------------
+  
+  Run(string,[]string)
+  		0: mv
+  		1: [/opt/sysward/bin/sysward /opt/sysward/bin/sysward.old]
+  
+  The closest call I have is: 
+  
+  Run(string,[]string)
+  		0: grep
+  		1: [name /proc/cpuinfo]
+   
+  goroutine 25 [running]:
+  github.com/stretchr/testify/mock.(*Mock).Called(0xc820075f10, 0xc820138380, 0x2, 0x2, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/github.com/stretchr/testify/mock/mock.go:210 +0x4dd
+  bitbucket.org/sysward/sysward-agent.(*MockRunner).Run(0xc820075f10, 0x44ab88, 0x2, 0xc820138340, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go:18 +0x31f
+  bitbucket.org/sysward/sysward-agent.CheckForUpdate()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/sysward-agent.go:202 +0x473
+  bitbucket.org/sysward/sysward-agent.(*Agent).Run(0xc8200e3668)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/sysward-agent.go:108 +0x4b
+  bitbucket.org/sysward/sysward-agent.TestAgentRun.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/agent_test.go:157 +0x4b
+  github.com/jtolds/gls._m(0x0, 0xc820101da0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc820101da0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc820101da0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8200f3e30, 0xc820101da0)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestAgentRun(0xc8200a8e10)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/agent_test.go:162 +0x2120
+  testing.tRunner(0xc8200a8e10, 0x64cd80)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650501)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 29 [IO wait]:
+  net.runtime_pollWait(0x7b4578, 0x72, 0xc82007a080)
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/netpoll.go:157 +0x60
+  net.(*pollDesc).Wait(0xc8200fe1b0, 0x72, 0x0, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/fd_poll_runtime.go:73 +0x3a
+  net.(*pollDesc).WaitRead(0xc8200fe1b0, 0x0, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/fd_poll_runtime.go:78 +0x36
+  net.(*netFD).Read(0xc8200fe150, 0xc820114000, 0x1000, 0x1000, 0x0, 0x7af028, 0xc82007a080)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/fd_unix.go:232 +0x23a
+  net.(*conn).Read(0xc8200920d8, 0xc820114000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/net.go:172 +0xe4
+  net/http.noteEOFReader.Read(0x7b5480, 0xc8200920d8, 0xc8201081b8, 0xc820114000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1370 +0x67
+  net/http.(*noteEOFReader).Read(0xc820101f40, 0xc820114000, 0x1000, 0x1000, 0x0, 0x0, 0x0)
+  	<autogenerated>:126 +0xd0
+  bufio.(*Reader).fill(0xc820079860)
+  	/usr/local/Cellar/go/1.5/libexec/src/bufio/bufio.go:97 +0x1e9
+  bufio.(*Reader).Peek(0xc820079860, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/bufio/bufio.go:132 +0xcc
+  net/http.(*persistConn).readLoop(0xc820108160)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:876 +0xf7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 30 [select]:
+  net/http.(*persistConn).writeLoop(0xc820108160)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+[0m[33m[0m[31m
+6 assertions thus far[0m
+
+--- FAIL: TestAgentRun (0.54s)
+=== RUN   TestCheckIn
+
+  Checking in via the API [32m✔[0m
+
+[31m[0m[33m[0m[31m
+7 assertions thus far[0m
+
+--- PASS: TestCheckIn (0.00s)
+=== RUN   TestApiJobFailure
+
+  Job failure should send the job data to the server [32m✔[0m
+
+[31m[0m[33m[0m[31m
+8 assertions thus far[0m
+
+--- PASS: TestApiJobFailure (0.00s)
+	mock.go:264: ✅	fetchJobPostbackUrl()
+=== RUN   TestApiJobPostBack
+
+  Accepting a job post back [32m✔[0m
+
+[31m[0m[33m[0m[31m
+9 assertions thus far[0m
+
+--- PASS: TestApiJobPostBack (0.00s)
+	mock.go:264: ✅	fetchJobPostbackUrl()
+=== RUN   TestApiCheckIn
+
+  Geting a succesful a list of jobs [32m✔[0m
+
+[31m[0m[33m[0m[31m
+10 assertions thus far[0m
+
+
+  Getting a list of jobs errors out [32m✔[0m
+
+[31m[0m[33m[0m[31m
+11 assertions thus far[0m
+
+
+  Getting a list of jobs gives invalid body [32m✔[0m
+
+[31m[0m[33m[0m[31m
+12 assertions thus far[0m
+
+--- PASS: TestApiCheckIn (0.00s)
+	mock.go:264: ✅	fetchJobUrl(string)
+	mock.go:264: ✅	fetchJobUrl(string)
+	mock.go:264: ✅	fetchJobUrl(string)
+=== RUN   TestPackagesThatNeedUpdates
+
+  Given pending updates 
+    There should be a list of packages available for update [32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[31m
+14 assertions thus far[0m
+
+--- PASS: TestPackagesThatNeedUpdates (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestChangeLog
+
+  Changelong gets 64bit encoded [32m✔[0m
+
+[31m[0m[33m[0m[31m
+15 assertions thus far[0m
+
+--- PASS: TestChangeLog (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestPackageUpdates
+
+  Given a package name 
+    The package should be upgraded [32m✔[0m
+    The package should not upgrade if held [32m✔[0m
+
+[31m[0m[33m[0m[31m
+17 assertions thus far[0m
+
+--- PASS: TestPackageUpdates (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestPackageHolding
+
+  Given holding a package 
+    The package should be held [32m✔[0m
+
+[31m[0m[33m[0m[31m
+18 assertions thus far[0m
+
+
+  Given unholding a package 
+    The package should be unheld [32m✔[0m
+
+[31m[0m[33m[0m[31m
+19 assertions thus far[0m
+
+--- PASS: TestPackageHolding (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestSourceList
+
+  Given /etc/apt/sources.list exists 
+    There should be a source list [32m✔[0m[32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[31m
+22 assertions thus far[0m
+
+--- PASS: TestSourceList (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestInstalledPackages
+
+  Given I want to view all installed packages 
+    It returns a list of all installed packages [32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[31m
+24 assertions thus far[0m
+
+--- PASS: TestInstalledPackages (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestUpdatingThePackageList
+
+  Given I want to have the latest source list 
+    apt-update gets run [32m✔[0m
+
+[31m[0m[33m[0m[31m
+25 assertions thus far[0m
+
+--- PASS: TestUpdatingThePackageList (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestUpdateCounts
+
+  Given there are security and regular updates 
+    The number of security and regular updates is > 0 [32m✔[0m[32m✔[0m
+    There are no security updates [32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[31m
+29 assertions thus far[0m
+
+--- PASS: TestUpdateCounts (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestBuildingAConfig
+
+  Given I have a valid configuration [31m🔥[0m
+
+[31m
+Errors:
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go 
+  Line 13: - unexpected end of JSON input 
+  goroutine 95 [running]:
+  bitbucket.org/sysward/sysward-agent.NewConfig(0x44e4a0, 0xe, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config.go:36 +0x17c
+  bitbucket.org/sysward/sysward-agent.TestBuildingAConfig.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go:13 +0x3b
+  github.com/jtolds/gls._m(0x0, 0xc820291f20)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc820291f20)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc820291f20)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc82028ba70, 0xc820291f20)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestBuildingAConfig(0xc8202697a0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go:31 +0x1e0
+  testing.tRunner(0xc8202697a0, 0x64ceb8)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650500)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 66 [select]:
+  net/http.(*persistConn).readLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:976 +0xac7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 67 [select]:
+  net/http.(*persistConn).writeLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+[0m[33m[0m[31m
+30 assertions thus far[0m
+
+--- FAIL: TestBuildingAConfig (0.00s)
+=== RUN   TestURLBuilding
+
+  Given I have a valid config [31m🔥[0m
+
+[31m
+Errors:
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go 
+  Line 39: - unexpected end of JSON input 
+  goroutine 96 [running]:
+  bitbucket.org/sysward/sysward-agent.NewConfig(0x44e4a0, 0xe, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config.go:36 +0x17c
+  bitbucket.org/sysward/sysward-agent.TestURLBuilding.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go:39 +0x50
+  github.com/jtolds/gls._m(0x0, 0xc8202be1a0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc8202be1a0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc8202be1a0)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc82028bc80, 0xc8202be1a0)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestURLBuilding(0xc820269830)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/config_test.go:63 +0x250
+  testing.tRunner(0xc820269830, 0x64ced0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650500)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 66 [select]:
+  net/http.(*persistConn).readLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:976 +0xac7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 67 [select]:
+  net/http.(*persistConn).writeLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+[0m[33m[0m[31m
+31 assertions thus far[0m
+
+--- FAIL: TestURLBuilding (0.00s)
+=== RUN   TestFileExists
+
+  A file should exist [32m✔[0m
+
+[31m[0m[33m[0m[31m
+32 assertions thus far[0m
+
+
+  A file doesnt exist [32m✔[0m
+
+[31m[0m[33m[0m[31m
+33 assertions thus far[0m
+
+--- PASS: TestFileExists (0.00s)
+=== RUN   TestFileAppends
+
+  Appending to a file [32m✔[0m
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+--- PASS: TestFileAppends (0.00s)
+=== RUN   TestRunningAJob
+
+  Given a 'upgrade-package' job 
+    The package should be upgraded 
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+
+  Given a 'hold-package' job 
+    The package should be held 
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+
+  Given a 'unhold-package' job 
+    The package should be unheld 
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+
+  Given an invalid job type 
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+--- PASS: TestRunningAJob (0.00s)
+	mock.go:264: ✅	UpdatePackage(string)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	UpdatePackage(string)
+	mock.go:264: ✅	HoldPackage(string)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	UpdatePackage(string)
+	mock.go:264: ✅	HoldPackage(string)
+	mock.go:264: ✅	UnholdPackage(string)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	UpdatePackage(string)
+	mock.go:264: ✅	HoldPackage(string)
+	mock.go:264: ✅	UnholdPackage(string)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobPostBack(main.Job)
+	mock.go:264: ✅	JobFailure(main.Job,string)
+=== RUN   TestJobPostback
+
+  Given the job is successful 
+    The job should postback success 
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[0m
+
+
+  Given the job is unccessful 
+    The job should not postback [33m⚠[0m
+
+[31m[0m[33m[0m[31m
+34 assertions thus far[33m (one or more sections skipped)[0m
+
+--- PASS: TestJobPostback (0.00s)
+=== RUN   TestRunningAllJobs
+
+  Given there are jobs 
+    Then all jobs get run [31m🔥[0m
+
+[31m
+Errors:
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go 
+  Line 140: - 
+  assert: mock: I don't know what to return because the method call was unexpected.
+  	Either do Mock.On("agentPingUrl").Return(...) first, or remove the agentPingUrl() call.
+  	This method was unexpected:
+  		agentPingUrl()
+  		
+  	at: test_helper_test.go:140 
+  goroutine 101 [running]:
+  github.com/stretchr/testify/mock.(*Mock).Called(0xc820254420, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/github.com/stretchr/testify/mock/mock.go:212 +0x81f
+  bitbucket.org/sysward/sysward-agent.(*MockConfig).agentPingUrl(0xc820254420, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go:140 +0x56
+  bitbucket.org/sysward/sysward-agent.PingApi()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/sysward-agent.go:89 +0x3cd
+  bitbucket.org/sysward/sysward-agent.runAllJobs(0xc8200df5f0, 0x2, 0x2)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job.go:44 +0x1ef
+  bitbucket.org/sysward/sysward-agent.TestRunningAllJobs.func1.1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:120 +0x681
+  github.com/jtolds/gls._m(0x0, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.mark1(0x0, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:23 +0x2b
+  github.com/jtolds/gls._m(0x1, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:72 +0x5a
+  github.com/jtolds/gls.markS(0x1, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x1, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5800, 0xc8202f1f60)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestRunningAllJobs.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:123 +0x1bf
+  github.com/jtolds/gls._m(0x0, 0xc8202f1e80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc8202f1e80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc8202f1e80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5740, 0xc8202f1e80)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestRunningAllJobs(0xc820302090)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:125 +0x236
+  testing.tRunner(0xc820302090, 0x64cf48)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650500)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 66 [select]:
+  net/http.(*persistConn).readLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:976 +0xac7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 67 [select]:
+  net/http.(*persistConn).writeLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+[0m[33m[0m[31m
+35 assertions thus far[0m
+
+
+  Given there are no jobs 
+    Then nothing happens 
+
+[31m[0m[33m[0m[31m
+35 assertions thus far[0m
+
+--- FAIL: TestRunningAllJobs (0.00s)
+=== RUN   TestGettingJobs
+
+  Given I have a valid configuration 
+    There are jobs [31m🔥[0m
+    There are no jobs [31m🔥[0m
+    Invalid JSON is sent back [32m✔[0m
+
+[31m
+Errors:
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go 
+  Line 130: - 
+  assert: mock: I don't know what to return because the method call was unexpected.
+  	Either do Mock.On("Config").Return(...) first, or remove the Config() call.
+  	This method was unexpected:
+  		Config()
+  		
+  	at: test_helper_test.go:130 
+  goroutine 102 [running]:
+  github.com/stretchr/testify/mock.(*Mock).Called(0xc820254420, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/github.com/stretchr/testify/mock/mock.go:212 +0x81f
+  bitbucket.org/sysward/sysward-agent.(*MockConfig).Config(0xc820254420, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go:130 +0x8e
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs.func1.1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:144 +0x1de
+  github.com/jtolds/gls._m(0x0, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.mark1(0x0, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:23 +0x2b
+  github.com/jtolds/gls._m(0x1, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:72 +0x5a
+  github.com/jtolds/gls.markS(0x1, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x1, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5e90, 0xc820322b60)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:147 +0x16f
+  github.com/jtolds/gls._m(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5d40, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs(0xc820302360)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:166 +0x1ae
+  testing.tRunner(0xc820302360, 0x64cf60)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650500)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 66 [select]:
+  net/http.(*persistConn).readLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:976 +0xac7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 67 [select]:
+  net/http.(*persistConn).writeLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+  * /Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go 
+  Line 130: - 
+  assert: mock: I don't know what to return because the method call was unexpected.
+  	Either do Mock.On("Config").Return(...) first, or remove the Config() call.
+  	This method was unexpected:
+  		Config()
+  		
+  	at: test_helper_test.go:130 
+  goroutine 102 [running]:
+  github.com/stretchr/testify/mock.(*Mock).Called(0xc820254420, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/github.com/stretchr/testify/mock/mock.go:212 +0x81f
+  bitbucket.org/sysward/sysward-agent.(*MockConfig).Config(0xc820254420, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/test_helper_test.go:130 +0x8e
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs.func1.2()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:153 +0x1d8
+  github.com/jtolds/gls._m(0x0, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.mark1(0x0, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:23 +0x2b
+  github.com/jtolds/gls._m(0x1, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:72 +0x5a
+  github.com/jtolds/gls.markS(0x1, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x1, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5fb0, 0xc820322c80)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs.func1()
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:156 +0x2b6
+  github.com/jtolds/gls._m(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:70 +0x2b
+  github.com/jtolds/gls.markS(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:21 +0x2b
+  github.com/jtolds/gls.addStackTag(0x0, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/stack_tags.go:18 +0x37
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc8200945a0, 0xc8202e5d40, 0xc820322b00)
+  	/Users/aether/go/src/github.com/jtolds/gls/context.go:98 +0x4e6
+  bitbucket.org/sysward/sysward-agent.TestGettingJobs(0xc820302360)
+  	/Users/aether/go/src/bitbucket.org/sysward/sysward-agent/job_test.go:166 +0x1ae
+  testing.tRunner(0xc820302360, 0x64cf60)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:456 +0x98
+  created by testing.RunTests
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:561 +0x86d
+  
+  goroutine 1 [chan receive]:
+  testing.RunTests(0x4fc8d8, 0x64cd20, 0x21, 0x21, 0x650500)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:562 +0x8ad
+  testing.(*M).Run(0xc820055ef8, 0x0)
+  	/usr/local/Cellar/go/1.5/libexec/src/testing/testing.go:494 +0x70
+  main.main()
+  	bitbucket.org/sysward/sysward-agent/_test/_testmain.go:118 +0x116
+  
+  goroutine 17 [syscall, locked to thread]:
+  runtime.goexit()
+  	/usr/local/Cellar/go/1.5/libexec/src/runtime/asm_amd64.s:1696 +0x1
+  
+  goroutine 66 [select]:
+  net/http.(*persistConn).readLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:976 +0xac7
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:685 +0xc78
+  
+  goroutine 67 [select]:
+  net/http.(*persistConn).writeLoop(0xc82018d6b0)
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:1009 +0x40c
+  created by net/http.(*Transport).dialConn
+  	/usr/local/Cellar/go/1.5/libexec/src/net/http/transport.go:686 +0xc9d
+  
+
+[0m[33m[0m[31m
+38 assertions thus far[0m
+
+--- FAIL: TestGettingJobs (0.00s)
+	mock.go:259: ❌	GetJobs()
+	mock.go:269: FAIL: 0 out of 1 expectation(s) were met.
+			The code you are testing needs to make 1 more call(s).
+			at: job_test.go:164
+=== RUN   TestSystemUid
+
+  Given i have valid network interfaces with MACs 
+    Then I should get a UID [32m✔[0m
+
+[31m[0m[33m[0m[31m
+39 assertions thus far[0m
+
+--- PASS: TestSystemUid (0.00s)
+=== RUN   TestPrereqs
+
+  Given pre-req's are installed [32m✔[0m
+
+[31m[0m[33m[0m[31m
+40 assertions thus far[0m
+
+
+  Given pre-req's aren't installed update notifier not found, installing
+
+
+[31m[0m[33m[0m[31m
+40 assertions thus far[0m
+
+--- PASS: TestPrereqs (0.00s)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	FileExists(string)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestPrivilegeEscalation
+
+  Given I have sudo acccess [33m⚠[0m
+
+[31m[0m[33m[0m[31m
+40 assertions thus far[33m (one or more sections skipped)[0m
+
+
+  Given I don't have sudo access [33m⚠[0m
+
+[31m[0m[33m[0m[31m
+40 assertions thus far[33m (one or more sections skipped)[0m
+
+
+  Given I need to be root 
+    I am root [32m✔[0m
+    I am not root [32m✔[0m
+
+[31m[0m[33m[0m[31m
+42 assertions thus far[0m
+
+
+  Give I am not root and don't have sudo access [33m⚠[0m
+
+[31m[0m[33m[0m[31m
+42 assertions thus far[33m (one or more sections skipped)[0m
+
+--- PASS: TestPrivilegeEscalation (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestOSInformation
+
+  Given I run lsb_release -a 
+    It should have an OS name [32m✔[0m
+    It should have a UID [32m✔[0m
+    It should have an OS version [32m✔[0m
+    It should have network interfaces 
+    It should have a hostname [32m✔[0m
+    It should have CPU information [32m✔[0m
+    It should have Memory information [32m✔[0m
+
+[31m[0m[33m[0m[31m
+48 assertions thus far[0m
+
+--- PASS: TestOSInformation (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestMemory
+
+  It should give me total memory [32m✔[0m
+
+[31m[0m[33m[0m[31m
+49 assertions thus far[0m
+
+--- PASS: TestMemory (0.00s)
+	mock.go:264: ✅	Run(string,[]string)
+=== RUN   TestCPUInformation
+
+  It should give me the CPU name [32m✔[0m
+
+[31m[0m[33m[0m[31m
+50 assertions thus far[0m
+
+--- PASS: TestCPUInformation (0.00s)
+=== RUN   TestInterfaceInformation
+
+  Given it has an interface on eth0 
+    It should give me an interface name [33m⚠[0m
+    It should have a MAC address [33m⚠[0m
+    Given it has one IP 
+      It should have a single IP [33m⚠[0m
+    Given it has multiple IPs 
+      It should have multiple IPs [33m⚠[0m
+
+[31m[0m[33m[0m[31m
+50 assertions thus far[33m (one or more sections skipped)[0m
+
+--- PASS: TestInterfaceInformation (0.00s)
+=== RUN   TestExecutingARealCommand
+
+  The command exits properly [32m✔[0m[32m✔[0m
+
+[31m[0m[33m[0m[31m
+52 assertions thus far[0m
+
+
+  The command doesnt exit properly [32m✔[0m
+
+[31m[0m[33m[0m[31m
+53 assertions thus far[0m
+
+--- PASS: TestExecutingARealCommand (0.01s)
+FAIL
+FAIL	bitbucket.org/sysward/sysward-agent	0.583s
+?   	bitbucket.org/sysward/sysward-agent/logging	[no test files]

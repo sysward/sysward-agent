@@ -1,0 +1,32 @@
+{
+	"ImportPath": "bitbucket.org/sysward/sysward-agent",
+	"GoVersion": "go1.5",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.8.7",
+			"Rev": "418b41d23a1bf978c06faea5313ba194650ac088"
+		},
+		{
+			"ImportPath": "github.com/jtolds/gls",
+			"Rev": "f1ac7f4f24f50328e6bc838ca4437d1612a0243c"
+		},
+		{
+			"ImportPath": "github.com/smartystreets/goconvey/convey",
+			"Comment": "1.5.0-357-gbf72d5d",
+			"Rev": "bf72d5d90ac6d3cbe0cf7b462ed60bd68f6d0cd1"
+		},
+		{
+			"ImportPath": "github.com/stretchr/objx",
+			"Rev": "cbeaeb16a013161a98496fad62933b1d21786672"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "2eaa4b48b8954bf871229043b8064ca156a542a5"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/mock",
+			"Rev": "2eaa4b48b8954bf871229043b8064ca156a542a5"
+		}
+	]
+}
