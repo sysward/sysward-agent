@@ -85,11 +85,60 @@ func (pm ZypperPackageManager) BuildInstalledPackageList() []string {
 	return packages
 }
 
+type ZypperPatches struct {
+	Category string
+	Severity string
+	Status   string
+	Summary  string
+}
+
+func (pm ZypperPackageManager) IsSecurityUpdate(patch_list []ZypperPatches, package_name string) bool {
+	for _, p := range patch_list {
+		if !strings.Contains(p.Summary, package_name) {
+			continue
+		}
+		return p.Category == "security"
+	}
+	return false
+}
+
+func (pm ZypperPackageManager) GetPatchList() []ZypperPatches {
+	out, err := runner.Run("zypper", "list-patches")
+	if err != nil {
+		panic(err)
+	}
+
+	patch_list := []ZypperPatches{}
+
+	for _, line := range strings.Split(out, "\n") {
+		if !strings.Contains(line, "Update |") {
+			continue
+		}
+		parts := strings.Split(line, "|")
+		tmp := ZypperPatches{
+			Category: strings.TrimSpace(parts[2]),
+			Severity: strings.TrimSpace(parts[3]),
+			Status:   strings.TrimSpace(parts[4]),
+			Summary:  strings.TrimSpace(parts[5]),
+		}
+
+		patch_list = append(patch_list, tmp)
+		if os.Getenv("DEBUG") == "true" {
+			fmt.Printf("%+v\n", tmp)
+		}
+	}
+
+	return patch_list
+}
+
 func (pm ZypperPackageManager) BuildPackageList() []OsPackage {
 	out, err := runner.Run("zypper", "list-updates")
 	if err != nil {
 		panic(err)
 	}
+
+	patch_list := pm.GetPatchList()
+
 	var packages []OsPackage
 
 	for _, line := range strings.Split(out, "\n") {
@@ -103,8 +152,11 @@ func (pm ZypperPackageManager) BuildPackageList() []OsPackage {
 			Candidate_version: strings.TrimSpace(parts[4]),
 			Security:          false,
 		}
+		pkg.Security = pm.IsSecurityUpdate(patch_list, pkg.Name)
 		packages = append(packages, pkg)
-		fmt.Println(fmt.Sprintf("%+v", pkg))
+		if os.Getenv("DEBUG") == "true" {
+			fmt.Println(fmt.Sprintf("%+v", pkg))
+		}
 	}
 
 	return packages
@@ -116,7 +168,15 @@ func (pm ZypperPackageManager) UpdatePackageLists() error {
 }
 
 func (pm ZypperPackageManager) UpdateCounts() Updates {
+	packages := pm.BuildPackageList()
 	security := 0
-	regular := len(pm.BuildPackageList())
+	regular := 0
+	for _, p := range packages {
+		if p.Security {
+			security++
+		} else {
+			regular++
+		}
+	}
 	return Updates{regular, security}
 }
