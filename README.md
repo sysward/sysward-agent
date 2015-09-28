@@ -2,5 +2,7 @@
 
 For more information please visit https://sysward.com/
 
-# BuildInstalledPackageList
-zypper search --installed-only
+
+# License
+
+SEE LICENSE.md
