@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
+	//	"strconv"
 	"strings"
 )
 
@@ -106,20 +106,15 @@ func (pm DebianPackageManager) UpdatePackageLists() error {
 }
 
 func (pm DebianPackageManager) UpdateCounts() Updates {
-	out, err := runner.Run("/usr/lib/update-notifier/apt-check")
-	if err != nil {
-		logging.LogMsg(err.Error())
-		return Updates{0, 0}
-	}
-	output := strings.TrimSpace(string(out))
-	ups := strings.Split(output, ";")
-	regular, err := strconv.Atoi(ups[0])
-	if err != nil {
-		panic(err)
-	}
-	security, err := strconv.Atoi(ups[1])
-	if err != nil {
-		panic(err)
+	packages := pm.BuildPackageList()
+	security := 0
+	regular := 0
+	for _, p := range packages {
+		if p.Security {
+			security++
+		} else {
+			regular++
+		}
 	}
 	return Updates{regular, security}
 }

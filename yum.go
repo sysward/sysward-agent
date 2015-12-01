@@ -107,14 +107,15 @@ func (pm CentosPackageManager) UpdatePackageLists() error {
 }
 
 func (pm CentosPackageManager) UpdateCounts() Updates {
-	out, err := runner.Run("yum", "list", "updates", "-q")
-	if err != nil {
-		panic(err)
+	packages := pm.BuildPackageList()
+	security := 0
+	regular := 0
+	for _, p := range packages {
+		if p.Security {
+			security++
+		} else {
+			regular++
+		}
 	}
-	regularOutput := strings.Split(string(out), "\n")[1:] // skip first line which is 'Updated Packages'
-	out, err = runner.Run("yum", "list", "updates", "-q", "--security")
-	securityOutput := strings.Split(string(out), "\n")
-	regular := len(regularOutput)
-	security := len(securityOutput)
 	return Updates{regular, security}
 }

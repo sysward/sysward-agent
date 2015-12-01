@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-HOSTS = centos6 centos7 ubuntu12 ubuntu14
+HOSTS = 10.10.0.2 10.10.0.3 10.10.0.4 10.10.0.5 10.10.0.13 10.10.0.15 10.10.0.10 10.10.0.9 10.10.0.14 10.10.0.12 10.10.0.11
 all: build
 
 test:
@@ -22,11 +22,17 @@ docker_build:
 docker_run:
 	docker run -v `pwd`:/go/src/bitbucket.org/sysward/sysward-agent sysward/agent
 
-qa: build_agent
+qa:
 	for host in $(HOSTS); do \
-		ssh root@$$host.local.sysward.com 'mkdir -p /opt/sysward/bin/'; \
-		scp sysward root@$$host.local.sysward.com:/opt/sysward/bin/; \
+		scp config.json root@$$host:/opt/sysward/bin/; \
+		scp sysward root@$$host:/opt/sysward/bin/; \
 	done
+qa_run:
+	for host in $(HOSTS); do \
+		ssh root@$$host "cd /opt/sysward/bin/; ./sysward" ;  \
+	done
+	wait
+
 
 bump_version:
 	ruby -e "f=File.read('version'); File.write('version', f.to_i+1); puts f.to_i+1"

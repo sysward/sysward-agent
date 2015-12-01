@@ -1,5 +1,5 @@
 {
-  "host": "192.168.1.57:3000",
+  "host": "10.10.0.16",
   "protocol": "http",
   "interval": "15s",
   "api_key": "c103e7e24a0b48c0700ee80c60185ca1e33d4eaf0e297a7c5f10283494895a2a"
