@@ -24,7 +24,6 @@ docker_run:
 
 qa:
 	for host in $(HOSTS); do \
-		scp config.json root@$$host:/opt/sysward/bin/; \
 		scp sysward root@$$host:/opt/sysward/bin/; \
 	done
 qa_run:
