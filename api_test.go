@@ -11,7 +11,7 @@ import (
 )
 
 func TestCheckIn(t *testing.T) {
-	expected := `{"packages":null,"system_updates":{"regular":0,"security":0},"operating_system":{"name":"","uid":"","version":"","interfaces":null,"hostname":"","cpu_information":{"name":"","count":0},"memory_information":{"total":""}},"sources":null,"installed_packages":null, "group":""}`
+	expected := `{"packages":null,"system_updates":{"regular":0,"security":0},"operating_system":{"name":"","uid":"","version":"","interfaces":null,"hostname":"","cpu_information":{"name":"","count":0},"memory_information":{"total":""}},"sources":null,"installed_packages":null,"group":""}`
 	Convey("Checking in via the API", t, func(ctx C) {
 		handler := func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
