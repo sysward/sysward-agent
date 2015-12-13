@@ -2,7 +2,7 @@ SHELL=/bin/bash
 all: build
 
 test:
-	go test -v ./...
+	godep go test -v ./...
 
 build: deps test build_agent
 
