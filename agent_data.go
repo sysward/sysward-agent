@@ -8,6 +8,7 @@ type AgentData struct {
 	OperatingSystem   OperatingSystem `json:"operating_system"`
 	Sources           []Source        `json:"sources"`
 	InstalledPackages []string        `json:"installed_packages"`
+	Group             string          `json:"group"`
 }
 
 func (a AgentData) ToJson() (string, error) {

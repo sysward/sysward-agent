@@ -1,5 +1,4 @@
 SHELL=/bin/bash
-HOSTS = 10.10.0.2 10.10.0.3 10.10.0.4 10.10.0.5 10.10.0.13 10.10.0.15 10.10.0.10 10.10.0.9 10.10.0.14 10.10.0.12 10.10.0.11
 all: build
 
 test:
@@ -23,9 +22,7 @@ docker_run:
 	docker run -v `pwd`:/go/src/bitbucket.org/sysward/sysward-agent sysward/agent
 
 qa:
-	for host in $(HOSTS); do \
-		scp sysward root@$$host:/opt/sysward/bin/; \
-	done
+	./qa.sh
 qa_run:
 	for host in $(HOSTS); do \
 		ssh root@$$host "cd /opt/sysward/bin/; ./sysward" ;  \

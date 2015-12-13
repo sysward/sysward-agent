@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	//	"./debian"
 	"bitbucket.org/sysward/sysward-agent/logging"
 )
@@ -138,6 +138,10 @@ func (a *Agent) Run() {
 		InstalledPackages: installedPackages,
 	}
 
+	if len(group) > 0 {
+		agentData.Group = group
+	}
+
 	err = api.CheckIn(agentData)
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
@@ -229,7 +233,11 @@ func CheckIfAgentIsRunning() {
 	}
 }
 
+var group string
+
 func main() {
+	flag.StringVar(&group, "group", "", "join this group automatically or create it")
+	flag.Parse()
 	agent := NewAgent()
 
 	// TODO: moving this into Startup() caused panics, investigate
