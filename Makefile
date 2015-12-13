@@ -8,10 +8,9 @@ build: deps test build_agent
 
 deps:
 	go get github.com/tools/godep
-	godep restore
 
 build_agent:
-	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' -o sysward
+	GOOS=linux CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o sysward
 
 docker: docker_build docker_run
 
