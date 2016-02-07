@@ -5,12 +5,12 @@ cd /opt/sysward/bin
 rm -rf sysward
 rm -rf trex.py
 echo "+ Downloading agent"
-wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/sysward
+wget -q http://updates.sysward.com/sysward
 echo "+ Downloading agent config"
-wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/config.deploy.json
+wget -q http://updates.sysward.com/config.deploy.json
 echo "+ Downloading python package reader"
-wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/trex.py
-wget -q https://github.com/sysward/sysward-agent/releases/download/1.0/list_updates.py
+wget -q http://updates.sysward.com/trex.py
+wget -q http://updates.sysward.com/list_updates.py
 
 chmod +x sysward
 echo "+ Moving config into place"

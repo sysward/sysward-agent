@@ -138,8 +138,16 @@ func (a *Agent) Run() {
 		InstalledPackages: installedPackages,
 	}
 
+	if len(hostname) > 0 {
+		agentData.Hostname = hostname
+	}
+
 	if len(group) > 0 {
 		agentData.Group = group
+	}
+
+	if len(customHostname) > 0 {
+		agentData.CustomHostname = customHostname
 	}
 
 	err = api.CheckIn(agentData)
@@ -180,10 +188,17 @@ func CurrentVersion() int {
 	return 38
 }
 
+func CheckScriptUpdates() {
+
+}
+
 func CheckForUpdate() {
 	if os.Getenv("SKIP_UPDATES") == "true" {
 		return
 	}
+
+	CheckScriptUpdates()
+
 	version := CurrentVersion()
 	resp, err := http.Get("http://updates.sysward.com/version")
 	if err != nil {
@@ -234,9 +249,13 @@ func CheckIfAgentIsRunning() {
 }
 
 var group string
+var customHostname string
+var hostname string
 
 func main() {
 	flag.StringVar(&group, "group", "", "join this group automatically or create it")
+	flag.StringVar(&customHostname, "custom-hostname", "", "set the custom hostname for this machine")
+	flag.StringVar(&hostname, "hostname", "", "set the hostname for this machine")
 	flag.Parse()
 	agent := NewAgent()
 

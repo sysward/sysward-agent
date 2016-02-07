@@ -9,6 +9,8 @@ type AgentData struct {
 	Sources           []Source        `json:"sources"`
 	InstalledPackages []string        `json:"installed_packages"`
 	Group             string          `json:"group"`
+	CustomHostname    string          `json:"custom_hostname"`
+	Hostname          string          `json:"hostname"`
 }
 
 func (a AgentData) ToJson() (string, error) {

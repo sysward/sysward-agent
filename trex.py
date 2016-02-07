@@ -36,7 +36,7 @@ def isSecurityUpgrade(ver):
 output = []
 
 SYNAPTIC_PINFILE = "/var/lib/synaptic/preferences"
-DISTRO = subprocess.Popen(['lsb_release', '-c', '-s'], stdout=subprocess.PIPE).communicate()[0]
+DISTRO = subprocess.Popen(['lsb_release', '-c', '-s'], stdout=subprocess.PIPE).communicate()[0].strip()
 
 apt_pkg.init()
 
