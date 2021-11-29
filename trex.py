@@ -70,8 +70,13 @@ for pkg in cache.packages:
         continue
     if cand_ver == inst_ver:
         continue
+    pkg_section = ""
+    try:
+        pkg_section = pkg.section
+    except:
+        pkg_section = ""
     record = {
-            "name": pkg.name, "security": isSecurityUpgrade(cand_ver), "section": pkg.section,
+            "name": pkg.name, "security": isSecurityUpgrade(cand_ver), "section": pkg_section,
             "current_version": inst_ver.ver_str, "candidate_version": cand_ver.ver_str,
             "priority": cand_ver.priority_str
             }
