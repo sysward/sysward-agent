@@ -1,0 +1,30 @@
+name: Build
+
+on: push
+#  push:
+#    # Publish `master` as Docker `latest` image.
+#    branches:
+#      - master
+#
+#    # Publish `v1.2.3` tags as releases.
+#    tags:
+#      - v*
+#
+#  # Run tests for any PRs.
+#  pull_request:
+
+jobs:
+
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Build
+        run: go build -v ./...
+      - name: Test
+        run: go test -v ./...
