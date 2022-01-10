@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bitbucket.org/sysward/sysward-agent/logging"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/sysward/sysward-agent/logging"
 	"os"
 	"strings"
 )

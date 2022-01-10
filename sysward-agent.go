@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 	//	"./debian"
-	"bitbucket.org/sysward/sysward-agent/logging"
+	"github.com/sysward/sysward-agent/logging"
 )
 
 type Agent struct {

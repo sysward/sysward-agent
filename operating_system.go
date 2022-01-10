@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bitbucket.org/sysward/sysward-agent/logging"
 	"fmt"
+	"github.com/sysward/sysward-agent/logging"
 	"net"
 	"os"
 	"runtime"

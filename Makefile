@@ -2,15 +2,12 @@ SHELL=/bin/bash
 all: build
 
 test:
-	godep go test -v ./...
+	go test -v ./...
 
 build: deps test build_agent
 
-deps:
-	go get github.com/tools/godep
-
 build_agent:
-	GOOS=linux CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags '-s' -o sysward
+	GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' -o sysward
 
 docker: docker_build docker_run
 

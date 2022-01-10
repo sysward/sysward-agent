@@ -82,4 +82,4 @@ for pkg in cache.packages:
             }
     output.append(record)
 
-print json.dumps(output)
+print(json.dumps(output))

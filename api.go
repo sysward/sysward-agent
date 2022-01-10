@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bitbucket.org/sysward/sysward-agent/logging"
 	"encoding/json"
 	"fmt"
+	"github.com/sysward/sysward-agent/logging"
 	"io/ioutil"
 	"net/http"
 	"strings"
