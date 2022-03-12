@@ -14,12 +14,10 @@ on: push
 #  pull_request:
 
 jobs:
-
-  build:
+  test:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
