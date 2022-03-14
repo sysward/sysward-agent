@@ -200,7 +200,7 @@ func CheckForUpdate() {
 	CheckScriptUpdates()
 
 	version := CurrentVersion()
-	resp, err := http.Get("http://updates.sysward.com/version")
+	resp, err := http.Get("https://updates.sysward.com/version")
 	if err != nil {
 		logging.LogMsg(err.Error())
 		return
