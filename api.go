@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"bitbucket.org/sysward/sysward-agent/logging"
+	"github.com/sysward/sysward-agent/logging"
 )
 
 type WebApi interface {

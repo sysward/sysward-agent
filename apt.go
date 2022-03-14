@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bitbucket.org/sysward/sysward-agent/logging"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -9,6 +8,7 @@ import (
 	"os"
 	//	"strconv"
 	"strings"
+	"github.com/sysward/sysward-agent/logging"
 )
 
 type DebianPackageManager struct{}
