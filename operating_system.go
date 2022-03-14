@@ -89,7 +89,8 @@ func checkPreReqs() {
 			logging.LogMsg(out)
 		}
 
-		if !fileReader.FileExists("/usr/lib/python2.7/dist-packages/apt/__init__.py") {
+		if !fileReader.FileExists("/usr/lib/python2.7/dist-packages/apt/__init__.py") ||
+			!fileReader.FileExists("/usr/lib/python3/dist-packages/apt/__init__.py") {
 			fmt.Println("python-apt not found, installing")
 			_, err := runner.Run("apt-get", "update")
 			out, err := runner.Run("apt-get", "install", "python-apt", "-y")
