@@ -31,8 +31,6 @@ jobs:
     needs: test
     runs-on: self-hosted
     steps:
-      - name: S3
-        run:
-          - aws s3 cp trex.py s3://updates.sysward.com/
-          - aws s3 cp sysward s3://updates.sysward.com/
-          - aws cloudfront create-invalidation --distribution-id EXAQZU7A32C2T --paths='/*'
+      - run: aws s3 cp trex.py s3://updates.sysward.com/
+      - run: aws s3 cp sysward s3://updates.sysward.com/
+      - run: aws cloudfront create-invalidation --distribution-id EXAQZU7A32C2T --paths='/*'
