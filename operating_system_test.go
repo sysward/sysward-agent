@@ -128,6 +128,7 @@ func TestPrereqs(t *testing.T) {
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
 		f.On("FileExists", "/usr/bin/python").Return(false)
 		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(false)
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(false)
 		r.On("Run", "apt-get", []string{"update"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "python", "-y"}).Return("", nil)
