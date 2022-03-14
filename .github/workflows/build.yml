@@ -28,6 +28,7 @@ jobs:
         run: SKIP_UPDATES=true go test -v ./...
 
   build:
+    needs: test
     runs-on: self-hosted
     steps:
       - name: S3
