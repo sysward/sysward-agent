@@ -24,8 +24,8 @@ func TestNewAgent(t *testing.T) {
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/etc/apt").Return(true)
 		f.On("FileExists", "/usr/bin/python").Return(true)
-		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
-		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true)
+		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
 		fileReader = f
 		agent.Startup()
@@ -81,8 +81,8 @@ func TestAgentStartup(t *testing.T) {
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/etc/apt").Return(true)
 		f.On("FileExists", "/usr/bin/python").Return(true)
-		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
-		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true)
+		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
 		agent := NewAgent()
 		runner = r
@@ -150,8 +150,8 @@ func TestAgentRun(t *testing.T) {
 	f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
 	f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
 	f.On("FileExists", "/usr/bin/python").Return(true)
-	f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
-	f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true)
+	f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+	f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 	fileReader = f
 
 	agentData := AgentData{
