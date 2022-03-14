@@ -114,6 +114,7 @@ func TestPrereqs(t *testing.T) {
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/usr/bin/python").Return(true)
 		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(false)
 		fileReader = f
 		So(func() { checkPreReqs() }, ShouldNotPanic)
 		// here
