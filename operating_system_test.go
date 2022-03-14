@@ -113,7 +113,7 @@ func TestPrereqs(t *testing.T) {
 		agent.linux = "debian"
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/usr/bin/python").Return(true)
-		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
 		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(false).Maybe()
 		fileReader = f
 		So(func() { checkPreReqs() }, ShouldNotPanic)
