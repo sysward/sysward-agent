@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sysward/sysward-agent/logging"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
+
+	"bitbucket.org/sysward/sysward-agent/logging"
 )
 
 type WebApi interface {
@@ -30,10 +32,12 @@ func (r SyswardApi) CheckIn(agentData AgentData) error {
 	}
 	logging.LogMsg("building json - finish")
 	logging.LogMsg("posting to api - start")
+	if os.Getenv("DEBUG") == "true" {
+		formatted_output, _ := json.MarshalIndent(o, "", "\t")
+		fmt.Println(string(formatted_output))
+	}
 	post_data := strings.NewReader(o)
 	req, err := http.NewRequest("POST", config.agentCheckinUrl(), post_data)
-	// formatted_output, _ := json.MarshalIndent(json_output, "", "\t")
-	// fmt.Println(string(formatted_output))
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 		return nil

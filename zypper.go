@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/base64"
+	//	"encoding/json"
+	"bitbucket.org/sysward/sysward-agent/logging"
 	"errors"
 	"fmt"
-	//	"encoding/json"
-	"github.com/sysward/sysward-agent/logging"
 	"os"
 	//	"strconv"
 	"strings"

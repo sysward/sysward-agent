@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bitbucket.org/sysward/sysward-agent/logging"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/sysward/sysward-agent/logging"
 )
 
 type Job struct {

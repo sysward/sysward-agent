@@ -13,7 +13,11 @@ func LogMsg(msg string) {
 	if os.Getenv("DOCKER") == "true" {
 		return
 	}
-	logfile, _ := syslog.New(syslog.LOG_NOTICE, "SYSWARD")
+	logfile, err := syslog.New(syslog.LOG_NOTICE, "SYSWARD")
+	if err != nil {
+		fmt.Println("Error writing to syslog: ", err)
+		return
+	}
 	pc, _, _, _ := runtime.Caller(1)
 	caller := runtime.FuncForPC(pc).Name()
 	_, file, line, _ := runtime.Caller(0)

@@ -14,7 +14,9 @@ import (
 	"strings"
 	"time"
 	//	"./debian"
-	"github.com/sysward/sysward-agent/logging"
+	"math/rand"
+
+	"bitbucket.org/sysward/sysward-agent/logging"
 )
 
 type Agent struct {
@@ -103,6 +105,28 @@ func PingApi() {
 	logging.LogMsg(fmt.Sprintf("finished pinging %s", time.Now()))
 }
 
+func UnregisterAgent() {
+	logging.LogMsg(fmt.Sprintf("unregister %s", time.Now()))
+	client := GetHttpClient()
+	data := url.Values{}
+	data.Set("version", fmt.Sprintf("%d", CurrentVersion()))
+
+	req, err := http.NewRequest("POST", config.unregisterAgentUrl(), bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		logging.LogMsg(fmt.Sprintf("[fatal unregister]: %s", err))
+		return
+	}
+	req.Header.Add("X-Sysward-Uid", getSystemUID())
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+	_, err = client.Do(req)
+	if err != nil {
+		logging.LogMsg(fmt.Sprintf("[fatal unregister]: %s", err))
+	}
+	logging.LogMsg(fmt.Sprintf("finished unregistering %s", time.Now()))
+}
+
 func (a *Agent) Run() {
 	var err error
 
@@ -136,6 +160,7 @@ func (a *Agent) Run() {
 		OperatingSystem:   operatingSystem,
 		Sources:           sources,
 		InstalledPackages: installedPackages,
+		RebootRequired:    rebootRequired(),
 	}
 
 	if len(hostname) > 0 {
@@ -176,16 +201,29 @@ func (a *Agent) InstallCron() {
 	}
 }
 
-var config Config
-var runner Runner
-var fileReader SystemFileReader
-var fileWriter SystemFileWriter
-var packageManager SystemPackageManager
-var api WebApi
-var agent Agent
+var (
+	Version         string = "38"
+	group           string
+	customHostname  string
+	hostname        string
+	displayVersion  bool
+	unregisterAgent bool
+	installingAgent bool
+	config          Config
+	runner          Runner
+	fileReader      SystemFileReader
+	fileWriter      SystemFileWriter
+	packageManager  SystemPackageManager
+	api             WebApi
+	agent           Agent
+)
 
 func CurrentVersion() int {
-	return 38
+	i, err := strconv.Atoi(Version)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 func CheckScriptUpdates() {
@@ -220,7 +258,7 @@ func CheckForUpdate() {
 		logging.LogMsg(fmt.Sprintf("Current Version: %d", version))
 		logging.LogMsg("Downloading latest version: " + string(body))
 		runner.Run("mv", "/opt/sysward/bin/sysward", "/opt/sysward/bin/sysward.old")
-		runner.Run("curl", "-O", "http://updates.sysward.com/sysward")
+		runner.Run("curl", "-O", "https://updates.sysward.com/sysward")
 		runner.Run("mv", "sysward", "/opt/sysward/bin/")
 		runner.Run("chmod", "+x", "/opt/sysward/bin/sysward")
 		logging.LogMsg("Upgrade finished, exiting")
@@ -248,21 +286,39 @@ func CheckIfAgentIsRunning() {
 	}
 }
 
-var group string
-var customHostname string
-var hostname string
-
 func main() {
 	flag.StringVar(&group, "group", "", "join this group automatically or create it")
 	flag.StringVar(&customHostname, "custom-hostname", "", "set the custom hostname for this machine")
 	flag.StringVar(&hostname, "hostname", "", "set the hostname for this machine")
+	flag.BoolVar(&displayVersion, "version", false, "display current version")
+	flag.BoolVar(&unregisterAgent, "unregister", false, "unregister the agent at the dashboard")
+	flag.BoolVar(&installingAgent, "install", false, "used when initially installing agent, disables random backoff")
+
 	flag.Parse()
 	agent := NewAgent()
+
+	if displayVersion {
+		fmt.Printf("SysWard Agent v%d\n", CurrentVersion())
+		os.Exit(0)
+	}
+
+	// if we're not installing the agent, back off
+	if !installingAgent {
+		rand.Seed(time.Now().Unix())
+		sleepTime := rand.Intn(59) + 1
+		logging.LogMsg(fmt.Sprintf("Random backoff time: %d", sleepTime))
+		time.Sleep(time.Duration(sleepTime) * time.Second)
+	}
 
 	// TODO: moving this into Startup() caused panics, investigate
 	CheckIfAgentIsRunning()
 	agent.InstallCron()
 	agent.Startup()
+
+	if unregisterAgent {
+		UnregisterAgent()
+		os.Exit(0)
+	}
 
 	// set Protocol to https if getting a 301 moved
 	client := GetHttpClient()

@@ -11,6 +11,7 @@ type AgentData struct {
 	Group             string          `json:"group"`
 	CustomHostname    string          `json:"custom_hostname"`
 	Hostname          string          `json:"hostname"`
+	RebootRequired    bool            `json:"reboot_required"`
 }
 
 func (a AgentData) ToJson() (string, error) {

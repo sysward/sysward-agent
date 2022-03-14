@@ -2,14 +2,38 @@ package main
 
 import (
 	"fmt"
-	"github.com/sysward/sysward-agent/logging"
 	"net"
 	"os"
 	"runtime"
 	"strings"
+
+	"bitbucket.org/sysward/sysward-agent/logging"
 )
 
+func rebootRequired() bool {
+	if agent.linux == "debian" {
+		return fileReader.FileExists("/var/run/reboot-required")
+	}
+	if agent.linux == "centos" {
+		out, _ := runner.Run("needs-restarting", "-r")
+		return strings.Contains(out,"Reboot is required")
+	}
+	if agent.linux == "suse" {
+		out, _ := runner.Run("zypper", "ps", "-s")
+		return strings.Contains(out, "You may wish to restart these processes.")
+	}
+	return false
+}
+
 func getSystemUID() string {
+	if fileReader.FileExists("/opt/sysward/bin/uid") {
+		readUID, err := fileReader.ReadFile("/opt/sysward/bin/uid")
+		if err != nil {
+			logging.LogMsg(fmt.Sprintf("Error reading UID file: %s", err))
+		} else {
+			return string(readUID)
+		}
+	}
 	interface_list, _ := net.Interfaces()
 	var uuid []string
 
@@ -36,7 +60,11 @@ func getSystemUID() string {
 	if os.Getenv("DEBUG") == "true" {
 		logging.LogMsg("UID: " + uid)
 	}
-	return strings.TrimSpace(string(uid))
+	trimmedUID := strings.TrimSpace(string(uid))
+	fw := SyswardFileWriter{}
+	os.Create("/opt/sysward/bin/uid")
+	fw.AppendToFile("/opt/sysward/bin/uid", trimmedUID)
+	return trimmedUID
 }
 
 func checkPreReqs() {
@@ -50,10 +78,57 @@ func checkPreReqs() {
 			}
 			logging.LogMsg(out)
 		}
+
+		if !fileReader.FileExists("/usr/bin/python") {
+			fmt.Println("python not found, installing")
+			_, err := runner.Run("apt-get", "update")
+			out, err := runner.Run("apt-get", "install", "python", "-y")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
+
+		if !fileReader.FileExists("/usr/lib/python2.7/dist-packages/apt/__init__.py") {
+			fmt.Println("python-apt not found, installing")
+			_, err := runner.Run("apt-get", "update")
+			out, err := runner.Run("apt-get", "install", "python-apt", "-y")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
+	} else if agent.linux == "suse" {
+		if !fileReader.FileExists("/usr/bin/lsb_release") {
+			fmt.Println("lsb_release not found, installing")
+			out, err := runner.Run("zypper", "install", "-y", "lsb-release")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
 	} else if agent.linux == "centos" {
 		if !fileReader.FileExists("/usr/bin/lsb_release") {
 			fmt.Println("lsb_release not found, installing")
 			out, err := runner.Run("yum", "install", "-y", "redhat-lsb-core")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
+
+		if !fileReader.FileExists("/usr/bin/needs-restarting") {
+			fmt.Println("needs-restarting not found, installing")
+			out, err := runner.Run("yum", "install", "-y", "yum-utils")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
+
+		if !fileReader.FileExists("/usr/bin/wget") {
+			fmt.Println("wget not found, installing")
+			out, err := runner.Run("yum", "install", "-y", "wget")
 			if err != nil {
 				panic(err)
 			}
@@ -96,9 +171,31 @@ func getOsInformation() OperatingSystem {
 	tmp := strings.Split(strings.TrimSpace(output[1]), " ")
 	hostname, err := os.Hostname()
 
+	osName := tmp[0]
+	osVersion := tmp[1]
+
+	if len(tmp) > 2 {
+		switch tmp[0] {
+		case "CentOS":
+			osVersion = tmp[2]
+		case "Debian":
+			osVersion = tmp[2]
+		default:
+		}
+
+	}
+
 	cpu_information := CPUInformation{getCPUName(), runtime.NumCPU()}
 	memory_information := MemoryInformation{getTotalMemory()}
-	return OperatingSystem{tmp[0], getSystemUID(), tmp[1], getInterfaceInformation(), hostname, cpu_information, memory_information}
+	return OperatingSystem{
+		Name:              osName,
+		UID:               getSystemUID(),
+		Version:           osVersion,
+		Interfaces:        getInterfaceInformation(),
+		Hostname:          hostname,
+		CPUInformation:    cpu_information,
+		MemoryInformation: memory_information,
+	}
 }
 
 func getTotalMemory() string {

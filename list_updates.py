@@ -1,10 +1,5 @@
 #!/bin/env python
 
-# real	0m51.237s
-# user	0m3.599s
-# sys	0m0.871s
-
-
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -25,6 +20,7 @@ import json
 import urllib
 import re
 import xml.etree.ElementTree as ET
+import os.path
 
 # Get verions of all installed packages
 base = yum.YumBase()
@@ -53,7 +49,12 @@ ERRATA_URL = "http://cefs.steve-meier.de/errata.latest.xml"
 #tree = ET.parse("errata.latest.xml")
 #root = tree.getroot()
 
-match = re.search(r"[\w\s]* (\d[\d\.]*)[\w\s]*", open("/etc/redhat-release").read())
+release_file = ""
+if os.path.isfile("/etc/os-release"):
+    release_file = open("/etc/os-release").read()
+if os.path.isfile("/etc/redhat-release"):
+    release_file = open("/etc/redhat-release").read()
+match = re.search(r"[\w\s]* (\d[\d\.]*)[\w\s]*", release_file)
 os_release = match.group(1).split(".")[0]
 
 
