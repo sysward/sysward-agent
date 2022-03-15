@@ -14,11 +14,12 @@ deps:
 	dep ensure
 
 build_agent:
+	buildNumber=${GITHUB_RUN_ID: -4}
 	echo "*****"
-	echo $$BUILD_NUMBER
+	echo $buildNumber
 	echo "*****"
 	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
-	  -ldflags "-X main.Version=`date -u +%Y%m%d`$$BUILD_NUMBER" -o sysward
+	  -ldflags "-X main.Version=`date -u +%Y%m%d`$$buildNumber" -o sysward
 
 docker: docker_build docker_run
 
