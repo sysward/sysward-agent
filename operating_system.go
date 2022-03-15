@@ -99,6 +99,20 @@ func checkPreReqs() {
 			}
 			logging.LogMsg(out)
 		}
+
+		// Specifically for Ubuntu 21+/Debian11+
+		out, err := runner.Run("python", "trex.py")
+		if err != nil {
+			logging.LogMsg("error running python-apt: " + err.Error())
+			if strings.Contains(out, "ImportError: No module named apt") {
+				logging.LogMsg("installing python-is-python3")
+				_, err := runner.Run("apt-get", "install", "python-is-python3", "-y")
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+
 	} else if agent.linux == "suse" {
 		if !fileReader.FileExists("/usr/bin/lsb_release") {
 			fmt.Println("lsb_release not found, installing")
