@@ -4,22 +4,15 @@ all: build
 test:
 	go test -v
 
-build: deps test build_agent cleanup
-
-cleanup:
-	rm -rf vendor
-
-deps:
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-	dep ensure
+build: test build_agent
 
 build_agent:
-	buildNumber=${GITHUB_RUN_ID: -4}
+	buildNumber := ${$GITHUB_RUN_ID: -4}
 	echo "*****"
-	echo $buildNumber
+	echo ${buildNumber}
 	echo "*****"
 	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
-	  -ldflags "-X main.Version=`date -u +%Y%m%d`$$buildNumber" -o sysward
+	  -ldflags "-X main.Version=`date -u +%Y%m%d`${buildNumber}" -o sysward
 
 docker: docker_build docker_run
 
