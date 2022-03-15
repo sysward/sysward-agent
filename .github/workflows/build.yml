@@ -27,10 +27,12 @@ jobs:
       - name: Test
         run: SKIP_UPDATES=true go test -v ./...
 
-  build:
+  deploy:
     needs: test
     runs-on: self-hosted
+    if: github.ref == 'refs/heads/master'
     steps:
       - run: aws s3 cp trex.py s3://updates.sysward.com/
       - run: aws s3 cp sysward s3://updates.sysward.com/
+      - run: aws s3 cp version s3://updates.sysward.com/
       - run: aws cloudfront create-invalidation --distribution-id EXAQZU7A32C2T --paths='/*'
