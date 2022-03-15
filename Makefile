@@ -1,4 +1,5 @@
 SHELL=/bin/bash
+BUILD_NUMBER=${GITHUB_RUN_ID}
 all: build
 
 test:
@@ -7,12 +8,11 @@ test:
 build: test build_agent
 
 build_agent:
-	buildNumber := ${$GITHUB_RUN_ID: -4}
-	echo "*****"
-	echo ${buildNumber}
-	echo "*****"
+	@echo "*****"
+	@echo ${BUILD_NUMBER}
+	@echo "*****"
 	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
-	  -ldflags "-X main.Version=`date -u +%Y%m%d`${buildNumber}" -o sysward
+	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward
 
 docker: docker_build docker_run
 
