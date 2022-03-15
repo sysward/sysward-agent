@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/sysward/sysward-agent/logging"
 	"os"
 	//	"strconv"
 	"strings"
+	"github.com/sysward/sysward-agent/logging"
 )
 
 type DebianPackageManager struct{}

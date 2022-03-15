@@ -1,13 +1,19 @@
 SHELL=/bin/bash
+BUILD_NUMBER=${GITHUB_RUN_ID}
 all: build
 
 test:
-	go test -v ./...
+	go test -v
 
-build: deps test build_agent
+build: test build_agent
 
 build_agent:
-	GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' -o sysward
+	@echo "*****"
+	@echo ${BUILD_NUMBER}
+	@echo "*****"
+	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
+	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward
+	echo `date -u +%Y%m%d`${BUILD_NUMBER} > version
 
 docker: docker_build docker_run
 
@@ -15,16 +21,7 @@ docker_build:
 	docker build --tag="sysward/agent" .
 
 docker_run:
-	docker run -v `pwd`:/go/src/bitbucket.org/sysward/sysward-agent sysward/agent
-
-qa:
-	./qa.sh
-qa_run:
-	for host in $(HOSTS); do \
-		ssh root@$$host "cd /opt/sysward/bin/; ./sysward" ;  \
-	done
-	wait
-
+	docker run -e BUILD_NUMBER=$$BUILD_NUMBER -v `pwd`:/go/src/bitbucket.org/sysward/sysward-agent sysward/agent
 
 bump_version:
 	ruby -e "f=File.read('version'); File.write('version', f.to_i+1); puts f.to_i+1"
@@ -36,6 +33,3 @@ release: build_agent bump_version push
 
 deploy:
 	echo "Deploying..."
-
-push:
-	scp sysward version sysward@web1.sysward.com:~/updates/public

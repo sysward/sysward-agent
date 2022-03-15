@@ -20,9 +20,14 @@ func TestNewAgent(t *testing.T) {
 		runner = r
 		config_json, _ := ioutil.ReadFile("config.json")
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/etc/apt").Return(true)
+		f.On("FileExists", "/usr/bin/python").Return(true)
+		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		fileReader = f
 		agent.Startup()
 		So(agent.runner, ShouldHaveSameTypeAs, SyswardRunner{})
@@ -76,7 +81,11 @@ func TestAgentStartup(t *testing.T) {
 		config_json, _ := ioutil.ReadFile("config.json")
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
 		f.On("FileExists", "/etc/apt").Return(true)
+		f.On("FileExists", "/usr/bin/python").Return(true)
+		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		agent := NewAgent()
 		runner = r
 		fileReader = f
@@ -138,7 +147,13 @@ func TestAgentRun(t *testing.T) {
 
 	config_json, _ := ioutil.ReadFile("config.json")
 	f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
+	f.On("FileExists", "/var/run/reboot-required").Return(true)
 	f.On("ReadFile", "config.json").Return(config_json, nil)
+	f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
+	f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
+	f.On("FileExists", "/usr/bin/python").Return(true)
+	f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
+	f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 	fileReader = f
 
 	agentData := AgentData{
@@ -147,6 +162,7 @@ func TestAgentRun(t *testing.T) {
 		OperatingSystem:   getOsInformation(),
 		Sources:           packageManager.GetSourcesList(),
 		InstalledPackages: packageManager.BuildInstalledPackageList(),
+		RebootRequired:    true,
 	}
 
 	a.On("CheckIn", agentData).Return(errors.New("foo"))

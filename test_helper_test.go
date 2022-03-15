@@ -141,6 +141,11 @@ func (c *MockConfig) agentPingUrl() string {
 	return args.String(0)
 }
 
+func (c *MockConfig) unregisterAgentUrl() string {
+	args := c.Mock.Called()
+	return args.String(0)
+}
+
 func (c *MockConfig) fetchJobUrl(uid string) string {
 	args := c.Mock.Called(uid)
 	return args.String(0)
