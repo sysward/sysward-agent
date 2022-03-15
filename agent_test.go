@@ -27,6 +27,7 @@ func TestNewAgent(t *testing.T) {
 		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		fileReader = f
 		agent.Startup()
 		So(agent.runner, ShouldHaveSameTypeAs, SyswardRunner{})
@@ -84,6 +85,7 @@ func TestAgentStartup(t *testing.T) {
 		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
 		f.On("ReadFile", "config.json").Return(config_json, nil)
+		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		agent := NewAgent()
 		runner = r
 		fileReader = f

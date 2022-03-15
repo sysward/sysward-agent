@@ -134,6 +134,7 @@ func TestPrereqs(t *testing.T) {
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "python", "-y"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "python-apt", "-y"}).Return("", nil)
+		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		fileReader = f
 		runner = r
 		// here
