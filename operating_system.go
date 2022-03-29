@@ -154,7 +154,15 @@ func checkPreReqs() {
 			fmt.Println("yum-plugin-versionlock.noarch not found, installing")
 			out, err := runner.Run("yum", "install", "-y", "yum-plugin-versionlock.noarch")
 			if err != nil {
-				panic(err)
+				if strings.ContainsAny(out, "Unable to find a match: yum-plugin-versionlock.noarch") {
+					var err2 error
+					out, err2 = runner.Run("yum", "install", "-y", "python3-dnf-plugin-versionlock")
+					if err2 != nil {
+						panic(err)
+					}
+				} else {
+					panic(err)
+				}
 			}
 			logging.LogMsg(out)
 		}
