@@ -100,13 +100,20 @@ func checkPreReqs() {
 			logging.LogMsg(out)
 		}
 
-		// Specifically for Ubuntu 21+/Debian11+
 		out, err := runner.Run("python", "trex.py")
 		if err != nil {
 			logging.LogMsg("error running python-apt(err): " + err.Error())
 			logging.LogMsg("error running python-apt(out): " + out)
-			if strings.Contains(out, "ImportError: No module named apt") ||
-				strings.Contains(err.Error(), "executable file not found in") {
+			// Specifically for older debian/ubuntu's
+			if strings.Contains(out, "ImportError: No module named apt") {
+				logging.LogMsg("installing python-apt")
+				_, err := runner.Run("apt-get", "install", "python-apt", "-y")
+				if err != nil {
+					panic(err)
+				}
+			}
+			// Specifically for Ubuntu 21+/Debian11+
+			if strings.Contains(err.Error(), "executable file not found in") {
 				logging.LogMsg("installing python-is-python3")
 				_, err := runner.Run("apt-get", "install", "python-is-python3", "-y")
 				if err != nil {
