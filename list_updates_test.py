@@ -101,4 +101,4 @@ for pkg in sorted(updates):
     api_response = urllib.urlopen(api_url).read()
     #print api_response
 
-print dump
+print(dump)
