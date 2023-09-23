@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/sysward/sysward-agent/logging"
+	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
+	"github.com/sysward/sysward-agent/logging"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -86,19 +87,67 @@ func (pm CentosPackageManager) BuildInstalledPackageList() []string {
 }
 
 func (pm CentosPackageManager) BuildPackageList() []OsPackage {
-	out, err := runner.Run("python", "list_updates.py")
-	var packages []OsPackage
-
-	if out == "" {
-		return packages
-	}
-
-	err = json.Unmarshal([]byte(out), &packages)
+	// build list of security updates first
+	cmd := exec.Command("dnf", "list", "updates", "--security")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}
 
-	return packages
+	// Parse the command output to extract update information
+
+	security := map[string]struct{}{}
+	lines := strings.Split(out.String(), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			continue
+		}
+		security[fields[0]] = struct{}{}
+	}
+
+	cmd = exec.Command("dnf", "list", "updates")
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	// Parse the command output to extract update information
+	var updates []OsPackage
+	lines = strings.Split(out.String(), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			continue
+		}
+
+		// Use rpm command to get the installed version
+		rpmCmd := exec.Command("rpm", "-q", fields[0])
+		rpmOut, err := rpmCmd.Output()
+		if err != nil {
+			continue // Skip if we can't get the installed version
+		}
+		installedVersion := strings.TrimSpace(string(rpmOut))
+
+		_, isSecurity := security[fields[0]]
+
+		// Create an Update struct and append it to the list
+		updates = append(updates, OsPackage{
+			Name:              fields[0],
+			Current_version:   installedVersion,
+			Candidate_version: fields[1],
+			// The Priority and Section information are not available directly from dnf list updates command
+			// If they are available from another source, you will need to adjust this part
+			Priority: "N/A",
+			Section:  fields[2],
+			Security: isSecurity,
+		})
+	}
+
+	return updates
 }
 
 func (pm CentosPackageManager) UpdatePackageLists() error {

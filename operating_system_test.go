@@ -55,11 +55,11 @@ func TestSystemUid(t *testing.T) {
 //[root@centos7-sysward ~]# echo $?
 //1
 
-//[root@centos7-sysward ~]# needs-restarting -r
-//No core libraries or services have been updated.
-//Reboot is probably not necessary.
-//[root@centos7-sysward ~]# echo $?
-//0
+// [root@centos7-sysward ~]# needs-restarting -r
+// No core libraries or services have been updated.
+// Reboot is probably not necessary.
+// [root@centos7-sysward ~]# echo $?
+// 0
 func TestRebootRequired(t *testing.T) {
 	Convey("It has a pending reboot file", t, func() {
 		agent := NewAgent()
@@ -177,12 +177,25 @@ func TestPrivilegeEscalation(t *testing.T) {
 func TestOSInformation(t *testing.T) {
 
 	r := new(MockRunner)
-	r.On("Run", "lsb_release", []string{"-d"}).Return("Description:    Ubuntu 14.04 LTS", nil)
 	r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
 	r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
 	runner = r
 
 	f := new(MockReader)
+	f.On("ReadFile", "/etc/os-release").Return([]byte(`
+NAME="Ubuntu"
+VERSION="20.04.6 LTS (Focal Fossa)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 20.04.6 LTS"
+VERSION_ID="20.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=focal
+UBUNTU_CODENAME=focal
+`), nil)
 	f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
 	f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
 	f.On("FileExists", "/usr/bin/python").Return(true)
@@ -201,7 +214,7 @@ func TestOSInformation(t *testing.T) {
 		})
 
 		Convey("It should have an OS version", func() {
-			So(os.Version, ShouldEqual, "14.04")
+			So(os.Version, ShouldEqual, "20.04")
 		})
 
 		Convey("It should have network interfaces", func() {
