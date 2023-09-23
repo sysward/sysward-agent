@@ -156,6 +156,20 @@ func TestAgentRun(t *testing.T) {
   f.On("FileExists", "/usr/bin/python").Return(true)
   f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
   f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
+  f.On("ReadFile", "/etc/os-release").Return([]byte(`
+NAME="Ubuntu"
+VERSION="20.04.6 LTS (Focal Fossa)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 20.04.6 LTS"
+VERSION_ID="20.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=focal
+UBUNTU_CODENAME=focal
+`), nil)
   fileReader = f
 
   agentData := AgentData{
