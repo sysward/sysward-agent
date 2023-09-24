@@ -3,7 +3,7 @@ BUILD_NUMBER=${GITHUB_RUN_ID}
 all: build
 
 test:
-	go test -v
+	go test -v ./...
 
 build: test build_agent
 

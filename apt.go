@@ -1,14 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sysward/sysward-agent/logging"
 	"os"
 	//	"strconv"
 	"strings"
-	"github.com/sysward/sysward-agent/logging"
 )
 
 type DebianPackageManager struct{}
@@ -86,15 +86,61 @@ func (pm DebianPackageManager) BuildInstalledPackageList() []string {
 }
 
 func (pm DebianPackageManager) BuildPackageList() []OsPackage {
-	out, err := runner.Run("python", "trex.py")
-	if err != nil {
-		panic(err)
-	}
 	var packages []OsPackage
 
-	err = json.Unmarshal([]byte(out), &packages)
+	out, err := runner.RunBytes("apt-get", "-s", "upgrade")
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
+		return nil
+	}
+
+	// Parse the output
+	lines := bytes.Split(out, []byte("\n"))
+	for _, line := range lines {
+		parts := bytes.Fields(line)
+		if len(parts) < 5 {
+			continue
+		}
+
+		if !bytes.Contains(line, []byte("Inst")) {
+			continue
+		}
+
+		// Parse the package information
+		name := strings.Split(string(parts[1]), "/")[0]
+
+		out, err = runner.RunBytes("dpkg", "-s", name)
+		if err != nil {
+			fmt.Println("Error:", err)
+			continue
+		}
+		availableVersion := strings.Replace(string(parts[3]), "(", "", -1)
+		var installedVersion string
+		var priority string
+		var section string
+		dpkgLines := bytes.Split(out, []byte("\n"))
+		for _, l := range dpkgLines {
+			if bytes.HasPrefix(l, []byte("Version: ")) {
+				installedVersion = strings.TrimSpace(string(l[9:]))
+			}
+			if bytes.HasPrefix(l, []byte("Priority: ")) {
+				priority = string(l[10:])
+			}
+			if bytes.HasPrefix(l, []byte("Section: ")) {
+				section = string(l[9:])
+			}
+		}
+
+		isSecurity := bytes.Contains(parts[4], []byte("Security"))
+
+		pkg := OsPackage{Name: name,
+			Current_version:   installedVersion,
+			Candidate_version: availableVersion,
+			Priority:          priority,
+			Section:           section,
+			Security:          isSecurity,
+		}
+		packages = append(packages, pkg)
 	}
 
 	return packages

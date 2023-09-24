@@ -79,50 +79,6 @@ func checkPreReqs() {
 			logging.LogMsg(out)
 		}
 
-		if !fileReader.FileExists("/usr/bin/python") {
-			fmt.Println("python not found, installing")
-			_, err := runner.Run("apt-get", "update")
-			out, err := runner.Run("apt-get", "install", "python", "-y")
-			if err != nil {
-				logging.LogMsg("error installing python, trying fallbacks: " + err.Error())
-			}
-			logging.LogMsg(out)
-		}
-
-		if !fileReader.FileExists("/usr/lib/python2.7/dist-packages/apt/__init__.py") &&
-			!fileReader.FileExists("/usr/lib/python3/dist-packages/apt/__init__.py") {
-			fmt.Println("python-apt not found, installing")
-			_, err := runner.Run("apt-get", "update")
-			out, err := runner.Run("apt-get", "install", "python-apt", "-y")
-			if err != nil {
-				logging.LogMsg(err.Error())
-			}
-			logging.LogMsg(out)
-		}
-
-		out, err := runner.Run("python", "trex.py")
-		if err != nil {
-			logging.LogMsg("error running python-apt(err): " + err.Error())
-			logging.LogMsg("error running python-apt(out): " + out)
-			// Specifically for older debian/ubuntu's
-			if strings.Contains(out, "ImportError: No module named apt") {
-				logging.LogMsg("installing python-apt")
-				_, err := runner.Run("apt-get", "install", "python-apt", "-y")
-				if err != nil {
-					logging.LogMsg(err.Error())
-				}
-			}
-			// Specifically for Ubuntu 21+/Debian11+
-			if strings.Contains(out, "ImportError: No module named apt") ||
-				strings.Contains(err.Error(), "executable file not found in") {
-				logging.LogMsg("installing python-is-python3")
-				_, err := runner.Run("apt-get", "install", "python-is-python3", "-y")
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
-
 	} else if agent.linux == "centos" {
 
 		if !fileReader.FileExists("/usr/bin/needs-restarting") {

@@ -111,11 +111,13 @@ func TestPrereqs(t *testing.T) {
 		f := new(MockReader)
 		agent := NewAgent()
 		agent.linux = "debian"
-		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
-		f.On("FileExists", "/usr/bin/python").Return(true)
-		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
-		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(false).Maybe()
 		fileReader = f
+		r := new(MockRunner)
+		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
+		r.On("Run", "apt-get", []string{"update"}).Return("", nil)
+		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
+		fileReader = f
+		runner = r
 		So(func() { checkPreReqs() }, ShouldNotPanic)
 		// here
 		f.Mock.AssertExpectations(t)
@@ -127,14 +129,8 @@ func TestPrereqs(t *testing.T) {
 		r := new(MockRunner)
 		f := new(MockReader)
 		f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(false)
-		f.On("FileExists", "/usr/bin/python").Return(false)
-		f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(false).Maybe()
-		f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(false).Maybe()
 		r.On("Run", "apt-get", []string{"update"}).Return("", nil)
 		r.On("Run", "apt-get", []string{"install", "update-notifier", "-y"}).Return("", nil)
-		r.On("Run", "apt-get", []string{"install", "python", "-y"}).Return("", nil)
-		r.On("Run", "apt-get", []string{"install", "python-apt", "-y"}).Return("", nil)
-		r.On("Run", "python", []string{"trex.py"}).Return("", nil)
 		fileReader = f
 		runner = r
 		// here

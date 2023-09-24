@@ -19,6 +19,13 @@ func (r *MockRunner) Run(command string, args ...string) (string, error) {
 	return _args.String(0), _args.Error(1)
 }
 
+func (r *MockRunner) RunBytes(command string, args ...string) ([]byte, error) {
+	pa := []string{}
+	pa = append(pa, args...)
+	_args := r.Mock.Called(command, pa)
+	return []byte(_args.String(0)), _args.Error(1)
+}
+
 /* Mock writer for writing to files */
 type MockWriter struct {
 	mock.Mock

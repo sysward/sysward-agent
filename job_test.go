@@ -95,6 +95,7 @@ func TestJobPostback(t *testing.T) {
 func TestRunningAllJobs(t *testing.T) {
 	pm := new(MockPackageManager)
 	a := new(MockSyswardApi)
+	f := new(MockReader)
 
 	Convey("Given there are jobs", t, func() {
 
@@ -113,10 +114,13 @@ func TestRunningAllJobs(t *testing.T) {
 			}
 			a.On("JobPostBack", jobs[0]).Return()
 			a.On("JobPostBack", jobs[1]).Return()
+			f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
+			f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
 			pm.On("UpdatePackage", "apt").Return(nil)
 			pm.On("UpdatePackage", "foo").Return(nil)
 			packageManager = pm
 			api = a
+			fileReader = f
 			runAllJobs(jobs)
 			pm.Mock.AssertExpectations(t)
 			a.Mock.AssertExpectations(t)

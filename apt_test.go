@@ -14,13 +14,51 @@ func TestPackagesThatNeedUpdates(t *testing.T) {
 	Convey("Given pending updates", t, func() {
 
 		Convey("There should be a list of packages available for update", func() {
-			mockValue := `[{"name": "apt", "section": "admin", "priority": "important", "current_version": "1.0.1ubuntu2", "security": true, "candidate_version": "1.0.1ubuntu2.1"}]`
+			mockValue := `
+Inst apport [2.20.11-0ubuntu82.4] (2.20.11-0ubuntu82.5 Ubuntu:22.04/jammy-updates [all])
+`
+			dpkMock := `
+Package: apport
+Status: install ok installed
+Priority: optional
+Section: utils
+Installed-Size: 812
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: all
+Version: 2.20.11-0ubuntu82.4
+Replaces: core-dump-handler, python-apport (<< 2.2-0ubuntu1)
+Provides: core-dump-handler
+Depends: python3, python3-apport (>= 2.20.11-0ubuntu82.4), lsb-base (>= 3.0-6), python3-gi, gir1.2-glib-2.0 (>= 1.29.17)
+Recommends: apport-symptoms, python3-systemd
+Suggests: apport-gtk | apport-kde, policykit-1
+Breaks: python-apport (<< 2.2-0ubuntu1)
+Conflicts: core-dump-handler
+Conffiles:
+ /etc/apport/blacklist.d/README.blacklist c2ed1eb9a17ec2550747b4960cf4b73c
+ /etc/apport/blacklist.d/apport 44503501302b80099552bac0204a45c1
+ /etc/apport/crashdb.conf 4202dae3eccfa5bbb33a0a9acfcd3724
+ /etc/bash_completion.d/apport_completion dfe766d9328bb5c895038b44185133f9
+ /etc/cron.daily/apport df5d3bc9ab3a67b58156376318077304
+ /etc/default/apport 3446c6cac185f44237f59786e006ebe4
+ /etc/init.d/apport 3d51dc9135014bb49b4a19ff8dab61f1
+ /etc/logrotate.d/apport fa54dab59ef899b48d5455c976008df4
+Description: automatically generate crash reports for debugging
+ apport automatically collects data from crashed processes and
+ compiles a problem report in /var/crash/. This utilizes the crashdump
+ helper hook provided by the Ubuntu kernel.
+ .
+ This package also provides a command line frontend for browsing and
+ handling the crash reports. For desktops, you should consider
+ installing the GTK+ or Qt user interface (apport-gtk or apport-kde).
+Homepage: https://wiki.ubuntu.com/Apport
+`
 			r := new(MockRunner)
-			r.On("Run", "python", []string{"trex.py"}).Return(mockValue, nil)
+			r.On("RunBytes", "apt-get", []string{"-s", "upgrade"}).Return(mockValue, nil)
+			r.On("RunBytes", "dpkg", []string{"-s", "apport"}).Return(dpkMock, nil)
 			runner = r
 			osPackages := packageManager.BuildPackageList()
-			So(osPackages[0].Name, ShouldEqual, "apt")
-			So(osPackages[0].Security, ShouldEqual, true)
+			So(osPackages[0].Name, ShouldEqual, "apport")
+			So(osPackages[0].Security, ShouldEqual, false)
 			r.Mock.AssertExpectations(t)
 		})
 	})

@@ -83,11 +83,7 @@ func TestAgentStartup(t *testing.T) {
     config_json, _ := ioutil.ReadFile("config.json")
     f.On("FileExists", "/usr/lib/update-notifier/apt-check").Return(true)
     f.On("FileExists", "/etc/apt").Return(true)
-    f.On("FileExists", "/usr/bin/python").Return(true)
-    f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true).Maybe()
-    f.On("FileExists", "/usr/lib/python3/dist-packages/apt/__init__.py").Return(true).Maybe()
     f.On("ReadFile", "config.json").Return(config_json, nil)
-    r.On("Run", "python", []string{"trex.py"}).Return("", nil)
     agent := NewAgent()
     runner = r
     fileReader = f
