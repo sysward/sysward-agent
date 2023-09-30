@@ -187,10 +187,18 @@ func (a *Agent) Run() {
 
 func (a *Agent) InstallCron() {
 	if !fileReader.FileExists("/etc/crontab") {
-		out, err := runner.Run("apt-get", "install", "cron", "-y")
-		logging.LogMsg("+ installing cron package: " + string(out))
-		if err != nil {
-			logging.LogMsg("Error installing cron: " + err.Error())
+		if a.linux == "debian" {
+			out, err := runner.Run("apt-get", "install", "cron", "-y")
+			logging.LogMsg("+ installing cron package: " + string(out))
+			if err != nil {
+				logging.LogMsg("Error installing cron: " + err.Error())
+			}
+		} else if a.linux == "arch" {
+			out, err := runner.Run("pacman", "-S", "cron", "--noconfirm")
+			logging.LogMsg("+ installing cron package: " + string(out))
+			if err != nil {
+				logging.LogMsg("Error installing cron: " + err.Error())
+			}
 		}
 	}
 	cronString := "*/5 * * * * root cd /opt/sysward/bin && ./sysward >> /dev/null\n"
