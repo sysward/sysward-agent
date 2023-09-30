@@ -56,6 +56,9 @@ func (a *Agent) Startup() {
 	} else if fileReader.FileExists("/usr/bin/zypper") {
 		a.packageManager = ZypperPackageManager{}
 		a.linux = "suse"
+	} else if fileReader.FileExists("/usr/bin/pacman") {
+		a.packageManager = ArchPackageManager{}
+		a.linux = "arch"
 	}
 
 	packageManager = agent.packageManager
