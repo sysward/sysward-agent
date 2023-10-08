@@ -80,6 +80,14 @@ func checkPreReqs() {
 		}
 
 	} else if agent.linux == "centos" {
+		if !fileReader.FileExists("/usr/bin/dnf") {
+			fmt.Println("dnf not found, installing")
+			out, err := runner.Run("yum", "install", "-y", "dnf")
+			if err != nil {
+				panic(err)
+			}
+			logging.LogMsg(out)
+		}
 
 		if !fileReader.FileExists("/usr/bin/needs-restarting") {
 			fmt.Println("needs-restarting not found, installing")
