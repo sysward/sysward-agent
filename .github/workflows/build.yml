@@ -34,5 +34,6 @@ jobs:
     steps:
       - run: aws s3 cp trex.py s3://updates.sysward.com/
       - run: aws s3 cp sysward s3://updates.sysward.com/
+      - run: aws s3 cp sysward_arm64 s3://updates.sysward.com/
       - run: aws s3 cp version s3://updates.sysward.com/
       - run: aws cloudfront create-invalidation --distribution-id EXAQZU7A32C2T --paths='/*'

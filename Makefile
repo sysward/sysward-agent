@@ -13,6 +13,8 @@ build_agent:
 	@echo "*****"
 	GOOS=linux CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
 	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
+	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward_arm64
 	echo -n `date -u +%Y%m%d`${BUILD_NUMBER} > version
 
 docker: docker_build docker_run
