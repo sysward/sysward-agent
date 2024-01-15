@@ -10,7 +10,9 @@ import (
 	"strings"
 )
 
-type CentosPackageManager struct{}
+type CentosPackageManager struct {
+	ForceYum bool
+}
 
 func (pm CentosPackageManager) UpdatePackage(pkg string) error {
 	out, err := runner.Run("yum",
@@ -88,7 +90,11 @@ func (pm CentosPackageManager) BuildInstalledPackageList() []string {
 
 func (pm CentosPackageManager) BuildPackageList() []OsPackage {
 	// build list of security updates first
-	cmd := exec.Command("dnf", "list", "updates", "--security")
+	pkgManager := "dnf"
+	if pm.ForceYum {
+		pkgManager = "yum"
+	}
+	cmd := exec.Command(pkgManager, "list", "updates", "--security")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
@@ -108,7 +114,7 @@ func (pm CentosPackageManager) BuildPackageList() []OsPackage {
 		security[fields[0]] = struct{}{}
 	}
 
-	cmd = exec.Command("dnf", "list", "updates")
+	cmd = exec.Command(pkgManager, "list", "updates")
 	cmd.Stdout = &out
 	err = cmd.Run()
 	if err != nil {
@@ -151,8 +157,8 @@ func (pm CentosPackageManager) BuildPackageList() []OsPackage {
 }
 
 func (pm CentosPackageManager) UpdatePackageLists() error {
-	_, err := runner.Run("apt-get", "update")
-	return err
+	// NOOP
+	return nil
 }
 
 func (pm CentosPackageManager) UpdateCounts() Updates {

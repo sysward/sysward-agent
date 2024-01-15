@@ -53,6 +53,17 @@ func (a *Agent) Startup() {
 	} else if fileReader.FileExists("/usr/bin/yum") {
 		a.packageManager = CentosPackageManager{}
 		a.linux = "centos"
+
+		release, err := a.fileReader.ReadFile("/etc/os-release")
+		if err != nil {
+			logging.LogMsg("Error reading /etc/os-release: " + err.Error())
+		}
+		if strings.Contains(string(release), "Amazon Linux") &&
+      !fileReader.FileExists("/usr/bin/dnf") {
+      a.packageManager = CentosPackageManager{ForceYum: true}
+      logging.LogMsg("Using Amazon Linux, forcing yum")
+		}
+
 	} else if fileReader.FileExists("/usr/bin/zypper") {
 		a.packageManager = ZypperPackageManager{}
 		a.linux = "suse"
