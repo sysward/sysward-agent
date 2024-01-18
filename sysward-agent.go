@@ -59,9 +59,9 @@ func (a *Agent) Startup() {
 			logging.LogMsg("Error reading /etc/os-release: " + err.Error())
 		}
 		if strings.Contains(string(release), "Amazon Linux") &&
-      !fileReader.FileExists("/usr/bin/dnf") {
-      a.packageManager = CentosPackageManager{ForceYum: true}
-      logging.LogMsg("Using Amazon Linux, forcing yum")
+			!fileReader.FileExists("/usr/bin/dnf") {
+			a.packageManager = CentosPackageManager{ForceYum: true}
+			logging.LogMsg("Using Amazon Linux, forcing yum")
 		}
 
 	} else if fileReader.FileExists("/usr/bin/zypper") {
@@ -286,11 +286,19 @@ func CheckForUpdate() {
 		panic(err)
 	}
 
+	architecture, err := runner.Run("uname", "-m")
+	if err != nil {
+		logging.LogMsg("Error getting architecture: " + err.Error())
+		os.Exit(1)
+	}
+
+	architecture = strings.TrimSpace(architecture)
+
 	if latestVersion > version {
 		logging.LogMsg(fmt.Sprintf("Current Version: %d", version))
-		logging.LogMsg("Downloading latest version: " + string(body))
+		logging.LogMsg("Downloading latest version: " + string(body) + " | arch: " + architecture)
 		runner.Run("mv", "/opt/sysward/bin/sysward", "/opt/sysward/bin/sysward.old")
-		runner.Run("curl", "-O", "https://updates.sysward.com/sysward")
+		runner.Run("curl", "-o", "sysward", "https://updates.sysward.com/sysward_"+architecture)
 		runner.Run("mv", "sysward", "/opt/sysward/bin/")
 		runner.Run("chmod", "+x", "/opt/sysward/bin/sysward")
 		logging.LogMsg("Upgrade finished, exiting")
