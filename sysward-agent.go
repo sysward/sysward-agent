@@ -250,8 +250,8 @@ var (
 	agent           Agent
 )
 
-func CurrentVersion() int {
-	i, err := strconv.Atoi(Version)
+func CurrentVersion() int64 {
+	i, err := strconv.ParseInt(Version, 10, 64)
 	if err != nil {
 		panic(err)
 	}
@@ -281,7 +281,7 @@ func CheckForUpdate() {
 		panic(err)
 	}
 
-	latestVersion, err := strconv.Atoi(string(body))
+	latestVersion, err := strconv.ParseInt(string(body), 10, 64)
 	if err != nil {
 		panic(err)
 	}
