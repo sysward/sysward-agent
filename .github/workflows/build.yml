@@ -36,5 +36,7 @@ jobs:
       - run: aws s3 cp sysward s3://updates.sysward.com/
       - run: aws s3 cp sysward_x86_64 s3://updates.sysward.com/
       - run: aws s3 cp sysward_arm64 s3://updates.sysward.com/
+      - run: aws s3 cp sysward_armv7l s3://updates.sysward.com/
+      - run: aws s3 cp sysward_armv6l s3://updates.sysward.com/
       - run: aws s3 cp version s3://updates.sysward.com/
       - run: aws cloudfront create-invalidation --distribution-id EXAQZU7A32C2T --paths='/*'
