@@ -1,17 +1,17 @@
 package main
 
 import (
-  "testing"
+	"testing"
 
-  . "github.com/smartystreets/goconvey/convey"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestSystemUid(t *testing.T) {
-  Convey("Given i have valid network interfaces with MACs", t, func() {
-    Convey("Then I should get a UID", func() {
-      So(getSystemUID(), ShouldNotBeNil)
-    })
-  })
+	Convey("Given i have valid network interfaces with MACs", t, func() {
+		Convey("Then I should get a UID", func() {
+			So(getSystemUID(), ShouldNotBeNil)
+		})
+	})
 }
 
 //linux-vs8b:~ # zypper ps -s
@@ -61,118 +61,118 @@ func TestSystemUid(t *testing.T) {
 // [root@centos7-sysward ~]# echo $?
 // 0
 func TestRebootRequired(t *testing.T) {
-  Convey("It has a pending reboot file", t, func() {
-    agent := NewAgent()
-    Convey("for debian flavors", func() {
-      f := new(MockReader)
-      fileReader = f
-      agent.linux = "debian"
-      f.On("FileExists", "/var/run/reboot-required").Return(true)
-      So(rebootRequired(), ShouldEqual, true)
-      f.Mock.AssertExpectations(t)
-    })
+	Convey("It has a pending reboot file", t, func() {
+		agent := NewAgent()
+		Convey("for debian flavors", func() {
+			f := new(MockReader)
+			fileReader = f
+			agent.linux = "debian"
+			f.On("FileExists", "/var/run/reboot-required").Return(true)
+			So(rebootRequired(), ShouldEqual, true)
+			f.Mock.AssertExpectations(t)
+		})
 
-    Convey("for centos flavors", func() {
-      agent.linux = "centos"
-      r := new(MockRunner)
-      r.On("Run", "needs-restarting", []string{"-r"}).
-        Return("Reboot is required.", nil)
-      runner = r
-      So(rebootRequired(), ShouldEqual, true)
-      r.Mock.AssertExpectations(t)
-    })
+		Convey("for centos flavors", func() {
+			agent.linux = "centos"
+			r := new(MockRunner)
+			r.On("Run", "needs-restarting", []string{"-r"}).
+				Return("Reboot is required.", nil)
+			runner = r
+			So(rebootRequired(), ShouldEqual, true)
+			r.Mock.AssertExpectations(t)
+		})
 
-    Convey("for suse flavors", func() {
-      agent.linux = "suse"
-      r := new(MockRunner)
-      r.On("Run", "zypper", []string{"ps", "-s"}).
-        Return("You may wish to restart these processes.", nil)
-      runner = r
-      So(rebootRequired(), ShouldEqual, true)
-      r.Mock.AssertExpectations(t)
-    })
-  })
+		Convey("for suse flavors", func() {
+			agent.linux = "suse"
+			r := new(MockRunner)
+			r.On("Run", "zypper", []string{"ps", "-s"}).
+				Return("You may wish to restart these processes.", nil)
+			runner = r
+			So(rebootRequired(), ShouldEqual, true)
+			r.Mock.AssertExpectations(t)
+		})
+	})
 
-  Convey("It doesnt have a pending reboot file", t, func() {
-    agent := NewAgent()
-    agent.linux = "debian"
-    f := new(MockReader)
-    f.On("FileExists", "/var/run/reboot-required").
-      Return(false)
-    fileReader = f
-    So(rebootRequired(), ShouldEqual, false)
-    f.Mock.AssertExpectations(t)
-  })
+	Convey("It doesnt have a pending reboot file", t, func() {
+		agent := NewAgent()
+		agent.linux = "debian"
+		f := new(MockReader)
+		f.On("FileExists", "/var/run/reboot-required").
+			Return(false)
+		fileReader = f
+		So(rebootRequired(), ShouldEqual, false)
+		f.Mock.AssertExpectations(t)
+	})
 }
 
 func TestPrereqs(t *testing.T) {
 
-  Convey("Given pre-req's are installed", t, func() {
-    f := new(MockReader)
-    agent := NewAgent()
-    agent.linux = "debian"
-    fileReader = f
-    r := new(MockRunner)
-    fileReader = f
-    runner = r
-    So(func() { checkPreReqs() }, ShouldNotPanic)
-    // here
-    f.Mock.AssertExpectations(t)
-  })
+	Convey("Given pre-req's are installed", t, func() {
+		f := new(MockReader)
+		agent := NewAgent()
+		agent.linux = "debian"
+		fileReader = f
+		r := new(MockRunner)
+		fileReader = f
+		runner = r
+		So(func() { checkPreReqs() }, ShouldNotPanic)
+		// here
+		f.Mock.AssertExpectations(t)
+	})
 
-  Convey("Given pre-req's aren't installed", t, func() {
-    agent := NewAgent()
-    agent.linux = "debian"
-    r := new(MockRunner)
-    f := new(MockReader)
-    fileReader = f
-    runner = r
-    // here
-    checkPreReqs()
-    f.Mock.AssertExpectations(t)
-    r.Mock.AssertExpectations(t)
-  })
+	Convey("Given pre-req's aren't installed", t, func() {
+		agent := NewAgent()
+		agent.linux = "debian"
+		r := new(MockRunner)
+		f := new(MockReader)
+		fileReader = f
+		runner = r
+		// here
+		checkPreReqs()
+		f.Mock.AssertExpectations(t)
+		r.Mock.AssertExpectations(t)
+	})
 
 }
 
 func TestPrivilegeEscalation(t *testing.T) {
-  Convey("Given I have sudo acccess", t, nil)
+	Convey("Given I have sudo acccess", t, nil)
 
-  Convey("Given I don't have sudo access", t, nil)
+	Convey("Given I don't have sudo access", t, nil)
 
-  Convey("Given I need to be root", t, func() {
+	Convey("Given I need to be root", t, func() {
 
-    Convey("I am root", func() {
-      r := new(MockRunner)
-      r.On("Run", "whoami", []string{}).Return("root", nil)
-      runner = r
-      So(verifyRoot(), ShouldEqual, "root")
-      r.Mock.AssertExpectations(t)
-    })
+		Convey("I am root", func() {
+			r := new(MockRunner)
+			r.On("Run", "whoami", []string{}).Return("root", nil)
+			runner = r
+			So(verifyRoot(), ShouldEqual, "root")
+			r.Mock.AssertExpectations(t)
+		})
 
-    Convey("I am not root", func() {
-      r := new(MockRunner)
-      r.On("Run", "whoami", []string{}).Return("notroot", nil)
-      runner = r
-      So(func() { verifyRoot() }, ShouldPanic)
-      r.Mock.AssertExpectations(t)
-    })
+		Convey("I am not root", func() {
+			r := new(MockRunner)
+			r.On("Run", "whoami", []string{}).Return("notroot", nil)
+			runner = r
+			So(func() { verifyRoot() }, ShouldPanic)
+			r.Mock.AssertExpectations(t)
+		})
 
-  })
+	})
 
-  Convey("Give I am not root and don't have sudo access", t, nil)
+	Convey("Give I am not root and don't have sudo access", t, nil)
 
 }
 
 func TestOSInformation(t *testing.T) {
 
-  r := new(MockRunner)
-  r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
-  r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
-  runner = r
+	r := new(MockRunner)
+	r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
+	r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
+	runner = r
 
-  f := new(MockReader)
-  f.On("ReadFile", "/etc/os-release").Return([]byte(`
+	f := new(MockReader)
+	f.On("ReadFile", "/etc/os-release").Return([]byte(`
 NAME="Ubuntu"
 VERSION="20.04.6 LTS (Focal Fossa)"
 ID=ubuntu
@@ -186,90 +186,90 @@ PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-poli
 VERSION_CODENAME=focal
 UBUNTU_CODENAME=focal
 `), nil)
-  f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
-  f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
-  f.On("FileExists", "/usr/bin/python").Return(true)
-  f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
-  fileReader = f
+	f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
+	f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
+	f.On("FileExists", "/usr/bin/python").Return(true)
+	f.On("FileExists", "/usr/lib/python2.7/dist-packages/apt/__init__.py").Return(true)
+	fileReader = f
 
-  os := getOsInformation()
-  Convey("Given I run lsb_release -a", t, func() {
+	os := getOsInformation()
+	Convey("Given I run lsb_release -a", t, func() {
 
-    Convey("It should have an OS name", func() {
-      So(os.Name, ShouldEqual, "Ubuntu")
-    })
+		Convey("It should have an OS name", func() {
+			So(os.Name, ShouldEqual, "Ubuntu")
+		})
 
-    Convey("It should have a UID", func() {
-      So(os.UID, ShouldNotBeNil)
-    })
+		Convey("It should have a UID", func() {
+			So(os.UID, ShouldNotBeNil)
+		})
 
-    Convey("It should have an OS version", func() {
-      So(os.Version, ShouldEqual, "20.04")
-    })
+		Convey("It should have an OS version", func() {
+			So(os.Version, ShouldEqual, "20.04")
+		})
 
-    Convey("It should have network interfaces", func() {
-    })
+		Convey("It should have network interfaces", func() {
+		})
 
-    Convey("It should have a hostname", func() {
-      So(os.Hostname, ShouldNotBeNil)
-    })
+		Convey("It should have a hostname", func() {
+			So(os.Hostname, ShouldNotBeNil)
+		})
 
-    Convey("It should have CPU information", func() {
-      So(os.CPUInformation.Name, ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
-    })
+		Convey("It should have CPU information", func() {
+			So(os.CPUInformation.Name, ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
+		})
 
-    Convey("It should have Memory information", func() {
-      So(os.MemoryInformation.Total, ShouldEqual, "1017764 kB")
-    })
+		Convey("It should have Memory information", func() {
+			So(os.MemoryInformation.Total, ShouldEqual, "1017764 kB")
+		})
 
-  })
+	})
 
-  r.Mock.AssertExpectations(t)
+	r.Mock.AssertExpectations(t)
 }
 
 func TestMemory(t *testing.T) {
 
-  Convey("It should give me total memory", t, func() {
-    r := new(MockRunner)
-    r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
-    runner = r
-    So(getTotalMemory(), ShouldEqual, "1017764 kB")
-    r.Mock.AssertExpectations(t)
-  })
+	Convey("It should give me total memory", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal:        1017764 kB", nil)
+		runner = r
+		So(getTotalMemory(), ShouldEqual, "1017764 kB")
+		r.Mock.AssertExpectations(t)
+	})
 
 }
 
 func TestCPUInformation(t *testing.T) {
 
-  Convey("It should give me the CPU name", t, func() {
-    r := new(MockRunner)
-    r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
-    runner = r
-    So(getCPUName(), ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
-  })
+	Convey("It should give me the CPU name", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name      : Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz", nil)
+		runner = r
+		So(getCPUName(), ShouldEqual, "Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz")
+	})
 
 }
 
 func TestInterfaceInformation(t *testing.T) {
 
-  Convey("Given it has an interface on eth0", t, func() {
+	Convey("Given it has an interface on eth0", t, func() {
 
-    Convey("It should give me an interface name", nil)
+		Convey("It should give me an interface name", nil)
 
-    Convey("It should have a MAC address", nil)
+		Convey("It should have a MAC address", nil)
 
-    Convey("Given it has one IP", func() {
+		Convey("Given it has one IP", func() {
 
-      Convey("It should have a single IP", nil)
+			Convey("It should have a single IP", nil)
 
-    })
+		})
 
-    Convey("Given it has multiple IPs", func() {
+		Convey("Given it has multiple IPs", func() {
 
-      Convey("It should have multiple IPs", nil)
+			Convey("It should have multiple IPs", nil)
 
-    })
+		})
 
-  })
+	})
 
 }
