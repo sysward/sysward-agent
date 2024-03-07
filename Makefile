@@ -21,6 +21,7 @@ build_agent:
 	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward_armv7l
 	GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-s' \
 	  -ldflags "-X main.Version=`date -u +%Y%m%d`${BUILD_NUMBER}" -o sysward_armv6l
+	cp sysward_arm64 sysward_aarch64
 	echo -n `date -u +%Y%m%d`${BUILD_NUMBER} > version
 
 docker: docker_build docker_run

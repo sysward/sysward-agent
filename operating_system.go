@@ -184,6 +184,9 @@ func getOsInformation() OperatingSystem {
 func getTotalMemory() string {
 	out, _ := runner.Run("grep", "MemTotal", "/proc/meminfo")
 	t := strings.Split(out, ":")
+	if len(t) < 2 {
+		return "0"
+	}
 	x := strings.TrimSpace(t[1])
 	return x
 }
@@ -191,6 +194,9 @@ func getTotalMemory() string {
 func getCPUName() string {
 	out, _ := runner.Run("grep", "name", "/proc/cpuinfo")
 	t := strings.Split(out, ":")
+	if len(t) < 2 {
+		return "Unknown"
+	}
 	return strings.TrimSpace(t[1])
 }
 
