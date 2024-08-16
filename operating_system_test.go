@@ -97,8 +97,8 @@ func TestRebootRequired(t *testing.T) {
 		agent := NewAgent()
 		agent.linux = "debian"
 		f := new(MockReader)
-		f.On("FileExists", "/var/run/reboot-required").
-			Return(false)
+		f.On("FileExists", "/var/run/reboot-required").Return(false)
+		f.On("FileExists", "/var/run/reboot-required.pkgs").Return(false)
 		fileReader = f
 		So(rebootRequired(), ShouldEqual, false)
 		f.Mock.AssertExpectations(t)

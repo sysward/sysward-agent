@@ -12,7 +12,7 @@ import (
 
 func rebootRequired() bool {
 	if agent.linux == "debian" {
-		return fileReader.FileExists("/var/run/reboot-required")
+		return fileReader.FileExists("/var/run/reboot-required") || fileReader.FileExists("/var/run/reboot-required.pkgs")
 	}
 	if agent.linux == "centos" {
 		out, _ := runner.Run("needs-restarting", "-r")
