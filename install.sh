@@ -1,9 +1,9 @@
 #!/bin/bash
 stop sysward-agent
+rm -f /opt/sysward/bin/sysward
+rm -f /opt/sysward/bin/trex.py
 mkdir -p /opt/sysward/bin
 cd /opt/sysward/bin
-rm -rf sysward
-rm -rf trex.py
 echo "+ Downloading agent"
 wget -q http://updates.sysward.com/sysward
 echo "+ Downloading agent config"
