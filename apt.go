@@ -85,6 +85,43 @@ func (pm DebianPackageManager) BuildInstalledPackageList() []string {
 	return packages
 }
 
+// dpkgQueryFormat asks dpkg-query for every field BuildPackageList needs in
+// one call: installed version, source package, architecture, priority, section.
+const dpkgQueryFormat = "${Version}\t${source:Package}\t${Architecture}\t${Priority}\t${Section}\n"
+
+type dpkgPackageInfo struct {
+	Version  string
+	Source   string
+	Arch     string
+	Priority string
+	Section  string
+}
+
+// parseDpkgQuery parses dpkgQueryFormat output. Only the first line is used
+// (a Multi-Arch: same package installed for several architectures yields one
+// line per architecture). An empty source falls back to the package name.
+func parseDpkgQuery(name string, out []byte) dpkgPackageInfo {
+	line := strings.SplitN(strings.TrimLeft(string(out), "\n"), "\n", 2)[0]
+	fields := strings.Split(line, "\t")
+	get := func(i int) string {
+		if i < len(fields) {
+			return strings.TrimSpace(fields[i])
+		}
+		return ""
+	}
+	info := dpkgPackageInfo{
+		Version:  get(0),
+		Source:   get(1),
+		Arch:     get(2),
+		Priority: get(3),
+		Section:  get(4),
+	}
+	if info.Source == "" {
+		info.Source = strings.SplitN(name, ":", 2)[0]
+	}
+	return info
+}
+
 func (pm DebianPackageManager) BuildPackageList() []OsPackage {
 	var packages []OsPackage
 
@@ -109,36 +146,25 @@ func (pm DebianPackageManager) BuildPackageList() []OsPackage {
 		// Parse the package information
 		name := strings.Split(string(parts[1]), "/")[0]
 
-		out, err = runner.RunBytes("dpkg", "-s", name)
+		dpkgOut, err := runner.RunBytes("dpkg-query", "-W", "-f="+dpkgQueryFormat, name)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
 		}
 		availableVersion := strings.Replace(string(parts[3]), "(", "", -1)
-		var installedVersion string
-		var priority string
-		var section string
-		dpkgLines := bytes.Split(out, []byte("\n"))
-		for _, l := range dpkgLines {
-			if bytes.HasPrefix(l, []byte("Version: ")) {
-				installedVersion = strings.TrimSpace(string(l[9:]))
-			}
-			if bytes.HasPrefix(l, []byte("Priority: ")) {
-				priority = string(l[10:])
-			}
-			if bytes.HasPrefix(l, []byte("Section: ")) {
-				section = string(l[9:])
-			}
-		}
+		info := parseDpkgQuery(name, dpkgOut)
 
 		isSecurity := bytes.Contains(parts[4], []byte("Security"))
 
 		pkg := OsPackage{Name: name,
-			Current_version:   installedVersion,
+			Current_version:   info.Version,
 			Candidate_version: availableVersion,
-			Priority:          priority,
-			Section:           section,
+			Priority:          info.Priority,
+			Section:           info.Section,
 			Security:          isSecurity,
+			Source:            info.Source,
+			Arch:              info.Arch,
+			InstalledEVR:      info.Version,
 		}
 		packages = append(packages, pkg)
 	}

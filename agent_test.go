@@ -120,6 +120,9 @@ func TestIfAgentIsRunning(t *testing.T) {
 }
 
 func TestAgentRun(t *testing.T) {
+	// Run() calls CheckForUpdate, which fetches updates.sysward.com and then
+	// shells out to uname via the mock runner; skip it so the test is hermetic.
+	t.Setenv("SKIP_UPDATES", "true")
 	r := new(MockRunner)
 	r.On("Run", "whoami", []string{}).Return("root", nil)
 	r.On("Run", "lsb_release", []string{"-d"}).Return("Description:    Ubuntu 14.04 LTS", nil)
