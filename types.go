@@ -19,6 +19,8 @@ type OperatingSystem struct {
 	Name              string            `json:"name"`
 	UID               string            `json:"uid"`
 	Version           string            `json:"version"`
+	ID                string            `json:"id,omitempty"`
+	IDLike            string            `json:"id_like,omitempty"`
 	Interfaces        []Interface       `json:"interfaces"`
 	Hostname          string            `json:"hostname"`
 	CPUInformation    CPUInformation    `json:"cpu_information"`
@@ -32,6 +34,9 @@ type OsPackage struct {
 	Priority          string `json:"priority"`
 	Security          bool   `json:"security"`
 	Section           string `json:"section"`
+	Source            string `json:"source,omitempty"`
+	Arch              string `json:"arch,omitempty"`
+	InstalledEVR      string `json:"installed_evr,omitempty"`
 }
 
 type Updates struct {

@@ -157,14 +157,7 @@ func getOsInformation() OperatingSystem {
 	if err != nil {
 		panic(err)
 	}
-	osInfo := map[string]string{}
-	for _, line := range strings.Split(string(osRelease), "\n") {
-		if len(line) == 0 {
-			continue
-		}
-		kv := strings.Split(line, "=")
-		osInfo[kv[0]] = strings.Trim(kv[1], "\"")
-	}
+	osInfo := parseOsRelease(string(osRelease))
 
 	hostname, err := os.Hostname()
 
@@ -174,11 +167,37 @@ func getOsInformation() OperatingSystem {
 		Name:              osInfo["NAME"],
 		UID:               getSystemUID(),
 		Version:           osInfo["VERSION_ID"],
+		ID:                strings.ToLower(osInfo["ID"]),
+		IDLike:            osInfo["ID_LIKE"],
 		Interfaces:        getInterfaceInformation(),
 		Hostname:          hostname,
 		CPUInformation:    cpu_information,
 		MemoryInformation: memory_information,
 	}
+}
+
+// parseOsRelease parses /etc/os-release style KEY=value lines. Blank lines and
+// comments are skipped, the key/value split happens on the first '=', and a
+// single pair of surrounding double or single quotes is stripped.
+func parseOsRelease(content string) map[string]string {
+	osInfo := map[string]string{}
+	for _, line := range strings.Split(content, "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			continue
+		}
+		idx := strings.Index(line, "=")
+		if idx <= 0 {
+			continue
+		}
+		key := strings.TrimSpace(line[:idx])
+		value := strings.TrimSpace(line[idx+1:])
+		if len(value) >= 2 && (value[0] == '"' || value[0] == '\'') && value[len(value)-1] == value[0] {
+			value = value[1 : len(value)-1]
+		}
+		osInfo[key] = value
+	}
+	return osInfo
 }
 
 func getTotalMemory() string {

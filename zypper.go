@@ -151,6 +151,11 @@ func (pm ZypperPackageManager) BuildPackageList() []OsPackage {
 			Current_version:   strings.TrimSpace(parts[3]),
 			Candidate_version: strings.TrimSpace(parts[4]),
 			Security:          false,
+			InstalledEVR:      strings.TrimSpace(parts[3]),
+		}
+		// columns: S | Repository | Name | Current Version | Available Version | Arch
+		if len(parts) > 5 {
+			pkg.Arch = strings.TrimSpace(parts[5])
 		}
 		pkg.Security = pm.IsSecurityUpdate(patch_list, pkg.Name)
 		packages = append(packages, pkg)

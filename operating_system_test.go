@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -207,6 +208,11 @@ UBUNTU_CODENAME=focal
 			So(os.Version, ShouldEqual, "20.04")
 		})
 
+		Convey("It should have an os-release ID and ID_LIKE", func() {
+			So(os.ID, ShouldEqual, "ubuntu")
+			So(os.IDLike, ShouldEqual, "debian")
+		})
+
 		Convey("It should have network interfaces", func() {
 		})
 
@@ -225,6 +231,82 @@ UBUNTU_CODENAME=focal
 	})
 
 	r.Mock.AssertExpectations(t)
+}
+
+func TestParseOsRelease(t *testing.T) {
+	Convey("Given an os-release file", t, func() {
+
+		Convey("RHEL style quoting, comments, blank lines and '=' in values", func() {
+			info := parseOsRelease(`# this is a comment
+NAME="Red Hat Enterprise Linux"
+VERSION="9.4 (Plow)"
+
+ID="rhel"
+ID_LIKE="fedora"
+VERSION_ID="9.4"
+  # indented comment
+not a key value line
+=novalue
+PRETTY_NAME='Red Hat Enterprise Linux 9.4 (Plow)'
+HOME_URL="https://www.redhat.com/?a=b&c=d"
+EMPTY=
+`)
+			So(info["NAME"], ShouldEqual, "Red Hat Enterprise Linux")
+			So(info["ID"], ShouldEqual, "rhel")
+			So(info["ID_LIKE"], ShouldEqual, "fedora")
+			So(info["VERSION_ID"], ShouldEqual, "9.4")
+			So(info["PRETTY_NAME"], ShouldEqual, "Red Hat Enterprise Linux 9.4 (Plow)")
+			So(info["HOME_URL"], ShouldEqual, "https://www.redhat.com/?a=b&c=d")
+			So(info["EMPTY"], ShouldEqual, "")
+			So(len(info), ShouldEqual, 8)
+		})
+
+		Convey("Unquoted multi-word ID_LIKE stays intact", func() {
+			info := parseOsRelease("ID=rocky\nID_LIKE=\"rhel centos fedora\"\n")
+			So(info["ID"], ShouldEqual, "rocky")
+			So(info["ID_LIKE"], ShouldEqual, "rhel centos fedora")
+		})
+
+		Convey("A lone quote is not stripped into nothing", func() {
+			info := parseOsRelease("X=\"\n")
+			So(info["X"], ShouldEqual, "\"")
+		})
+	})
+
+	Convey("getOsInformation lowercases ID and keeps NAME/VERSION_ID", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "grep", []string{"MemTotal", "/proc/meminfo"}).Return("MemTotal: 1 kB", nil)
+		r.On("Run", "grep", []string{"name", "/proc/cpuinfo"}).Return("model name : cpu", nil)
+		runner = r
+		f := new(MockReader)
+		f.On("ReadFile", "/etc/os-release").Return([]byte("NAME=\"openSUSE Leap\"\nVERSION_ID=\"15.5\"\nID=\"OpenSUSE-Leap\"\nID_LIKE=\"suse opensuse\"\n"), nil)
+		f.On("ReadFile", "/opt/sysward/bin/uid").Return([]byte("uid123"), nil)
+		f.On("FileExists", "/opt/sysward/bin/uid").Return(true)
+		fileReader = f
+
+		info := getOsInformation()
+		So(info.Name, ShouldEqual, "openSUSE Leap")
+		So(info.Version, ShouldEqual, "15.5")
+		So(info.ID, ShouldEqual, "opensuse-leap")
+		So(info.IDLike, ShouldEqual, "suse opensuse")
+	})
+}
+
+func TestOperatingSystemJSONFields(t *testing.T) {
+	Convey("The OS payload carries id and id_like", t, func() {
+		b, err := json.Marshal(OperatingSystem{ID: "rhel", IDLike: "fedora"})
+		So(err, ShouldBeNil)
+		So(string(b), ShouldContainSubstring, `"id":"rhel"`)
+		So(string(b), ShouldContainSubstring, `"id_like":"fedora"`)
+	})
+
+	Convey("The package payload carries source, arch and installed_evr", t, func() {
+		b, err := json.Marshal(OsPackage{Source: "openssl", Arch: "amd64", InstalledEVR: "3.0.2-0ubuntu1.15"})
+		So(err, ShouldBeNil)
+		So(string(b), ShouldContainSubstring, `"source":"openssl"`)
+		So(string(b), ShouldContainSubstring, `"arch":"amd64"`)
+		So(string(b), ShouldContainSubstring, `"installed_evr":"3.0.2-0ubuntu1.15"`)
+	})
 }
 
 func TestMemory(t *testing.T) {

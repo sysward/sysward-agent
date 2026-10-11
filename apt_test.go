@@ -17,49 +17,84 @@ func TestPackagesThatNeedUpdates(t *testing.T) {
 			mockValue := `
 Inst apport [2.20.11-0ubuntu82.4] (2.20.11-0ubuntu82.5 Ubuntu:22.04/jammy-updates [all])
 `
-			dpkMock := `
-Package: apport
-Status: install ok installed
-Priority: optional
-Section: utils
-Installed-Size: 812
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Architecture: all
-Version: 2.20.11-0ubuntu82.4
-Replaces: core-dump-handler, python-apport (<< 2.2-0ubuntu1)
-Provides: core-dump-handler
-Depends: python3, python3-apport (>= 2.20.11-0ubuntu82.4), lsb-base (>= 3.0-6), python3-gi, gir1.2-glib-2.0 (>= 1.29.17)
-Recommends: apport-symptoms, python3-systemd
-Suggests: apport-gtk | apport-kde, policykit-1
-Breaks: python-apport (<< 2.2-0ubuntu1)
-Conflicts: core-dump-handler
-Conffiles:
- /etc/apport/blacklist.d/README.blacklist c2ed1eb9a17ec2550747b4960cf4b73c
- /etc/apport/blacklist.d/apport 44503501302b80099552bac0204a45c1
- /etc/apport/crashdb.conf 4202dae3eccfa5bbb33a0a9acfcd3724
- /etc/bash_completion.d/apport_completion dfe766d9328bb5c895038b44185133f9
- /etc/cron.daily/apport df5d3bc9ab3a67b58156376318077304
- /etc/default/apport 3446c6cac185f44237f59786e006ebe4
- /etc/init.d/apport 3d51dc9135014bb49b4a19ff8dab61f1
- /etc/logrotate.d/apport fa54dab59ef899b48d5455c976008df4
-Description: automatically generate crash reports for debugging
- apport automatically collects data from crashed processes and
- compiles a problem report in /var/crash/. This utilizes the crashdump
- helper hook provided by the Ubuntu kernel.
- .
- This package also provides a command line frontend for browsing and
- handling the crash reports. For desktops, you should consider
- installing the GTK+ or Qt user interface (apport-gtk or apport-kde).
-Homepage: https://wiki.ubuntu.com/Apport
-`
+			dpkMock := "2.20.11-0ubuntu82.4\tapport\tall\toptional\tutils\n"
 			r := new(MockRunner)
 			r.On("RunBytes", "apt-get", []string{"-s", "upgrade"}).Return(mockValue, nil)
-			r.On("RunBytes", "dpkg", []string{"-s", "apport"}).Return(dpkMock, nil)
+			r.On("RunBytes", "dpkg-query", []string{"-W", "-f=" + dpkgQueryFormat, "apport"}).Return(dpkMock, nil)
 			runner = r
 			osPackages := packageManager.BuildPackageList()
 			So(osPackages[0].Name, ShouldEqual, "apport")
 			So(osPackages[0].Security, ShouldEqual, false)
+			So(osPackages[0].Current_version, ShouldEqual, "2.20.11-0ubuntu82.4")
+			So(osPackages[0].Candidate_version, ShouldEqual, "2.20.11-0ubuntu82.5")
+			So(osPackages[0].Priority, ShouldEqual, "optional")
+			So(osPackages[0].Section, ShouldEqual, "utils")
+			So(osPackages[0].Source, ShouldEqual, "apport")
+			So(osPackages[0].Arch, ShouldEqual, "all")
+			So(osPackages[0].InstalledEVR, ShouldEqual, "2.20.11-0ubuntu82.4")
 			r.Mock.AssertExpectations(t)
+		})
+	})
+}
+
+func TestPackageListSourceArchAndEVR(t *testing.T) {
+	packageManager = DebianPackageManager{}
+	Convey("Given pending updates whose binary and source names differ", t, func() {
+		mockValue := `
+Inst libssl3 [3.0.2-0ubuntu1.15] (3.0.2-0ubuntu1.18 Debian-Security:12/stable-security [amd64])
+Inst libc6:i386 [2.35-0ubuntu3.6] (2.35-0ubuntu3.8 Ubuntu:22.04/jammy-updates [i386])
+Inst tzdata [1:2024a-0ubuntu0.22.04] (1:2024b-0ubuntu0.22.04 Ubuntu:22.04/jammy-updates [all])
+`
+		r := new(MockRunner)
+		r.On("RunBytes", "apt-get", []string{"-s", "upgrade"}).Return(mockValue, nil)
+		r.On("RunBytes", "dpkg-query", []string{"-W", "-f=" + dpkgQueryFormat, "libssl3"}).
+			Return("3.0.2-0ubuntu1.15\topenssl\tamd64\toptional\tlibs\n", nil)
+		r.On("RunBytes", "dpkg-query", []string{"-W", "-f=" + dpkgQueryFormat, "libc6:i386"}).
+			Return("2.35-0ubuntu3.6\tglibc\ti386\toptional\tlibs\n", nil)
+		// older dpkg without source:Package support yields an empty source
+		r.On("RunBytes", "dpkg-query", []string{"-W", "-f=" + dpkgQueryFormat, "tzdata"}).
+			Return("1:2024a-0ubuntu0.22.04\t\tall\trequired\tlocalization\n", nil)
+		runner = r
+
+		pkgs := packageManager.BuildPackageList()
+		So(len(pkgs), ShouldEqual, 3)
+
+		So(pkgs[0].Name, ShouldEqual, "libssl3")
+		So(pkgs[0].Source, ShouldEqual, "openssl")
+		So(pkgs[0].Arch, ShouldEqual, "amd64")
+		So(pkgs[0].InstalledEVR, ShouldEqual, "3.0.2-0ubuntu1.15")
+		So(pkgs[0].Current_version, ShouldEqual, "3.0.2-0ubuntu1.15")
+		So(pkgs[0].Security, ShouldBeTrue)
+
+		So(pkgs[1].Name, ShouldEqual, "libc6:i386")
+		So(pkgs[1].Source, ShouldEqual, "glibc")
+		So(pkgs[1].Arch, ShouldEqual, "i386")
+
+		So(pkgs[2].Source, ShouldEqual, "tzdata")
+		So(pkgs[2].InstalledEVR, ShouldEqual, "1:2024a-0ubuntu0.22.04")
+		So(pkgs[2].Current_version, ShouldEqual, "1:2024a-0ubuntu0.22.04")
+		So(pkgs[2].Priority, ShouldEqual, "required")
+		So(pkgs[2].Section, ShouldEqual, "localization")
+		r.Mock.AssertExpectations(t)
+	})
+}
+
+func TestParseDpkgQuery(t *testing.T) {
+	Convey("Given dpkg-query output", t, func() {
+		Convey("Multi-arch duplicates use the first line", func() {
+			info := parseDpkgQuery("libc6", []byte("2.35-0ubuntu3.6\tglibc\tamd64\trequired\tlibs\n2.35-0ubuntu3.6\tglibc\ti386\trequired\tlibs\n"))
+			So(info.Version, ShouldEqual, "2.35-0ubuntu3.6")
+			So(info.Arch, ShouldEqual, "amd64")
+		})
+		Convey("Empty source falls back to the name without arch qualifier", func() {
+			info := parseDpkgQuery("libfoo:i386", []byte("1.0-1\t\ti386\toptional\tlibs\n"))
+			So(info.Source, ShouldEqual, "libfoo")
+		})
+		Convey("Short output does not panic", func() {
+			info := parseDpkgQuery("foo", []byte("1.0-1"))
+			So(info.Version, ShouldEqual, "1.0-1")
+			So(info.Source, ShouldEqual, "foo")
+			So(info.Arch, ShouldEqual, "")
 		})
 	})
 }
