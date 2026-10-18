@@ -203,7 +203,8 @@ type Vulnerability struct {
 	Package []string `json:"packages"`
 }
 
-const trackerAPIURL = "https://security.archlinux.org/json"
+// trackerAPIURL is a variable so tests can point it at a local server.
+var trackerAPIURL = "https://security.archlinux.org/json"
 
 var vulns []Vulnerability
 
@@ -211,16 +212,24 @@ func preloadVulns() {
 	resp, err := http.Get(trackerAPIURL)
 	if err != nil {
 		fmt.Println("Error fetching data:", err)
+		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Error fetching data: unexpected status", resp.Status)
+		return
+	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
+		return
 	}
 
 	if err := json.Unmarshal(data, &vulns); err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
+		return
 	}
 	fmt.Println("Loaded vulns: ", len(vulns))
 }
