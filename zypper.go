@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/base64"
 	//	"encoding/json"
-	"github.com/sysward/sysward-agent/logging"
 	"errors"
 	"fmt"
+	"github.com/sysward/sysward-agent/logging"
 	"os"
 	//	"strconv"
 	"strings"
