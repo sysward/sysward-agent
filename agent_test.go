@@ -123,6 +123,13 @@ func TestAgentRun(t *testing.T) {
 	// Run() calls CheckForUpdate, which fetches updates.sysward.com and then
 	// shells out to uname via the mock runner; skip it so the test is hermetic.
 	t.Setenv("SKIP_UPDATES", "true")
+	// Run() pings the API; point it at a local server so the test neither
+	// depends on config set by an earlier test nor dials config.json's host.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer server.Close()
+	config = SyswardConfig{AgentConfig: ConfigSettings{Host: server.Listener.Addr().String(), Protocol: "http", ApiKey: "test"}}
+	// rebootRequired() reads /var/run/reboot-required only on debian.
+	agent.linux = "debian"
 	r := new(MockRunner)
 	r.On("Run", "whoami", []string{}).Return("root", nil)
 	r.On("Run", "lsb_release", []string{"-d"}).Return("Description:    Ubuntu 14.04 LTS", nil)
