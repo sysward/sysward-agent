@@ -122,6 +122,66 @@ func parseDpkgQuery(name string, out []byte) dpkgPackageInfo {
 	return info
 }
 
+type aptInstLine struct {
+	Name      string
+	Candidate string
+	Security  bool
+}
+
+// parseAptInstLine parses one "Inst" line of `apt-get -s upgrade`:
+//
+//	Inst libssl3 [3.0.2-0ubuntu1.15] (3.0.2-0ubuntu1.18 Ubuntu:22.04/jammy-updates, Ubuntu:22.04/jammy-security [amd64])
+//
+// The parenthesised part holds the candidate version, then one or more
+// comma-separated "Label:Version/Archive" releases it is available from,
+// then the architecture. The "[old]" part is absent for a new install.
+func parseAptInstLine(line string) (aptInstLine, bool) {
+	fields := strings.Fields(line)
+	if len(fields) < 3 || fields[0] != "Inst" {
+		return aptInstLine{}, false
+	}
+	open := strings.Index(line, "(")
+	end := strings.LastIndex(line, ")")
+	if open < 0 || end < open {
+		return aptInstLine{}, false
+	}
+	inner := strings.TrimSpace(line[open+1 : end])
+	if i := strings.LastIndex(inner, " ["); i >= 0 {
+		inner = inner[:i]
+	}
+	parts := strings.SplitN(inner, " ", 2)
+	inst := aptInstLine{
+		Name:      strings.Split(fields[1], "/")[0],
+		Candidate: parts[0],
+	}
+	if len(parts) == 2 {
+		for _, release := range strings.Split(parts[1], ",") {
+			if isAptSecurityRelease(strings.TrimSpace(release)) {
+				inst.Security = true
+			}
+		}
+	}
+	return inst, true
+}
+
+// isAptSecurityRelease reports whether a "Label:Version/Archive" release
+// is a security archive: Ubuntu "Ubuntu:22.04/jammy-security", Debian 11+
+// "Debian-Security:12/stable-security" or "Debian:12/bookworm-security", and
+// pre-11 Debian whose label alone says so ("Debian-Security:10/oldstable").
+func isAptSecurityRelease(release string) bool {
+	release = strings.ToLower(release)
+	label, archive := release, release
+	if i := strings.Index(release, ":"); i >= 0 {
+		label = release[:i]
+	}
+	if i := strings.LastIndex(release, "/"); i >= 0 {
+		archive = release[i+1:]
+	}
+	return strings.HasSuffix(label, "-security") ||
+		archive == "security" ||
+		strings.HasSuffix(archive, "-security")
+}
+
 func (pm DebianPackageManager) BuildPackageList() []OsPackage {
 	var packages []OsPackage
 
@@ -134,34 +194,25 @@ func (pm DebianPackageManager) BuildPackageList() []OsPackage {
 	// Parse the output
 	lines := bytes.Split(out, []byte("\n"))
 	for _, line := range lines {
-		parts := bytes.Fields(line)
-		if len(parts) < 5 {
+		inst, ok := parseAptInstLine(string(line))
+		if !ok {
 			continue
 		}
-
-		if !bytes.Contains(line, []byte("Inst")) {
-			continue
-		}
-
-		// Parse the package information
-		name := strings.Split(string(parts[1]), "/")[0]
+		name := inst.Name
 
 		dpkgOut, err := runner.RunBytes("dpkg-query", "-W", "-f="+dpkgQueryFormat, name)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
 		}
-		availableVersion := strings.Replace(string(parts[3]), "(", "", -1)
 		info := parseDpkgQuery(name, dpkgOut)
-
-		isSecurity := bytes.Contains(parts[4], []byte("Security"))
 
 		pkg := OsPackage{Name: name,
 			Current_version:   info.Version,
-			Candidate_version: availableVersion,
+			Candidate_version: inst.Candidate,
 			Priority:          info.Priority,
 			Section:           info.Section,
-			Security:          isSecurity,
+			Security:          inst.Security,
 			Source:            info.Source,
 			Arch:              info.Arch,
 			InstalledEVR:      info.Version,
