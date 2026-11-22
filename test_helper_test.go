@@ -91,6 +91,11 @@ func (r *MockPackageManager) BuildInstalledPackageList() []string {
 	return args.Get(0).([]string)
 }
 
+func (r *MockPackageManager) BuildInstalledInventory() []InstalledPackage {
+	args := r.Mock.Called()
+	return args.Get(0).([]InstalledPackage)
+}
+
 func (r *MockPackageManager) UpdatePackageLists() error {
 	args := r.Mock.Called()
 	return args.Error(0)

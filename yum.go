@@ -348,3 +348,42 @@ func (pm CentosPackageManager) UpdateCounts() Updates {
 	}
 	return Updates{regular, security}
 }
+
+// rpmInventoryFormat prints one line per installed rpm. EPOCHNUM renders a
+// missing epoch as 0, matching the installed_evr format used for updates.
+const rpmInventoryFormat = "%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}\t%{ARCH}\n"
+
+// rpmInstalledInventory lists all installed rpms with ONE rpm call. Several
+// instances of one name (kernels) each get their own entry.
+func rpmInstalledInventory() []InstalledPackage {
+	out, err := runner.RunBytes("rpm", "-qa", "--queryformat", rpmInventoryFormat)
+	if err != nil && len(out) == 0 {
+		return []InstalledPackage{}
+	}
+	return parseRpmInventory(out)
+}
+
+func parseRpmInventory(out []byte) []InstalledPackage {
+	pkgs := []InstalledPackage{}
+	for _, line := range strings.Split(string(out), "\n") {
+		f := strings.Split(line, "\t")
+		if len(f) < 3 {
+			continue
+		}
+		name := strings.TrimSpace(f[0])
+		// gpg-pubkey entries are keys, not software.
+		if name == "" || name == "gpg-pubkey" {
+			continue
+		}
+		arch := strings.TrimSpace(f[2])
+		if arch == "(none)" {
+			arch = ""
+		}
+		pkgs = append(pkgs, InstalledPackage{Name: name, Version: strings.TrimSpace(f[1]), Arch: arch})
+	}
+	return pkgs
+}
+
+func (pm CentosPackageManager) BuildInstalledInventory() []InstalledPackage {
+	return rpmInstalledInventory()
+}

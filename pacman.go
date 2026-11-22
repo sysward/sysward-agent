@@ -293,3 +293,24 @@ func (pm ArchPackageManager) UpdateCounts() Updates {
 	}
 	return Updates{regular, security}
 }
+
+// BuildInstalledInventory returns "name version" pairs from one pacman -Q call.
+func (pm ArchPackageManager) BuildInstalledInventory() []InstalledPackage {
+	output, err := runner.Run("pacman", "-Q")
+	if err != nil {
+		return []InstalledPackage{}
+	}
+	return parsePacmanInventory(output)
+}
+
+func parsePacmanInventory(output string) []InstalledPackage {
+	pkgs := []InstalledPackage{}
+	for _, line := range strings.Split(output, "\n") {
+		parts := strings.Fields(line)
+		if len(parts) < 2 {
+			continue
+		}
+		pkgs = append(pkgs, InstalledPackage{Name: parts[0], Version: parts[1]})
+	}
+	return pkgs
+}

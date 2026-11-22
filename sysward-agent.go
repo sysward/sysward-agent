@@ -93,9 +93,17 @@ func GetHttpClient() http.Client {
 		tr.Proxy = http.ProxyURL(proxyUrl)
 	}
 
-	client := http.Client{Transport: tr}
+	// Without a timeout a stalled connection blocks this run forever, and
+	// CheckIfAgentIsRunning then refuses every later cron run: the host goes
+	// silent until someone kills the process (seen while testing against a
+	// server that accepted the connection and never answered).
+	client := http.Client{Transport: tr, Timeout: httpTimeout}
 	return client
 }
+
+// httpTimeout bounds every API call, including the check-in upload. The
+// largest payload is a few hundred kilobytes.
+const httpTimeout = 2 * time.Minute
 
 func PingApi() {
 	logging.LogMsg(fmt.Sprintf("pinging %s", time.Now()))
@@ -167,14 +175,16 @@ func (a *Agent) Run() {
 	sources := packageManager.GetSourcesList()
 
 	installedPackages := packageManager.BuildInstalledPackageList()
+	installedInventory := packageManager.BuildInstalledInventory()
 
 	agentData := AgentData{
-		Packages:          packages,
-		SystemUpdates:     counts,
-		OperatingSystem:   operatingSystem,
-		Sources:           sources,
-		InstalledPackages: installedPackages,
-		RebootRequired:    rebootRequired(),
+		Packages:           packages,
+		SystemUpdates:      counts,
+		OperatingSystem:    operatingSystem,
+		Sources:            sources,
+		InstalledPackages:  installedPackages,
+		InstalledInventory: inventoryToSend(installedInventory, time.Now(), installingAgent),
+		RebootRequired:     rebootRequired(),
 	}
 
 	if len(hostname) > 0 {
@@ -193,6 +203,7 @@ func (a *Agent) Run() {
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 	}
+	markInventorySent(agentData.InstalledInventory, time.Now())
 	logging.LogMsg("Agent finished")
 }
 

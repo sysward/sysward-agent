@@ -241,3 +241,45 @@ func (pm DebianPackageManager) UpdateCounts() Updates {
 	}
 	return Updates{regular, security}
 }
+
+// dpkgInventoryFormat lists every package with the fields the server needs for
+// CVE lookup. db:Status-Abbrev is last so removed-but-configured packages
+// ("rc") can be skipped.
+const dpkgInventoryFormat = "${Package}\t${Version}\t${source:Package}\t${Architecture}\t${db:Status-Abbrev}\n"
+
+// BuildInstalledInventory returns every installed package with version, source
+// package and architecture, collected with a single dpkg-query call.
+func (pm DebianPackageManager) BuildInstalledInventory() []InstalledPackage {
+	out, err := runner.RunBytes("dpkg-query", "-W", "-f="+dpkgInventoryFormat)
+	if err != nil && len(out) == 0 {
+		return []InstalledPackage{}
+	}
+	return parseDpkgInventory(out)
+}
+
+func parseDpkgInventory(out []byte) []InstalledPackage {
+	pkgs := []InstalledPackage{}
+	for _, line := range strings.Split(string(out), "\n") {
+		f := strings.Split(line, "\t")
+		if len(f) < 5 || strings.TrimSpace(f[0]) == "" || strings.TrimSpace(f[1]) == "" {
+			continue
+		}
+		// only fully installed packages ("ii"/"hi"); skip rc/un/etc.
+		status := strings.TrimSpace(f[4])
+		if !strings.HasPrefix(status, "ii") && !strings.HasPrefix(status, "hi") {
+			continue
+		}
+		name := strings.TrimSpace(f[0])
+		src := strings.TrimSpace(f[2])
+		if src == "" {
+			src = name
+		}
+		pkgs = append(pkgs, InstalledPackage{
+			Name:    name,
+			Version: strings.TrimSpace(f[1]),
+			Source:  src,
+			Arch:    strings.TrimSpace(f[3]),
+		})
+	}
+	return pkgs
+}

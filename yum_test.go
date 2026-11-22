@@ -172,3 +172,25 @@ func itoa(i int) string {
 	}
 	return "0"
 }
+
+func TestRpmInstalledInventory(t *testing.T) {
+	Convey("rpm output lists every kernel instance and skips gpg keys", t, func() {
+		out := "kernel-core\t0:5.14.0-362.8.1.el9_3\tx86_64\n" +
+			"kernel-core\t0:5.14.0-362.24.1.el9_3\tx86_64\n" +
+			"openssl-libs\t1:3.0.7-24.el9\tx86_64\n" +
+			"gpg-pubkey\t0:5a6340b3-6229229e\t(none)\n" +
+			"tzdata\t0:2023c-1.el9\tnoarch\n"
+		r := new(MockRunner)
+		r.On("RunBytes", "rpm", []string{"-qa", "--queryformat", rpmInventoryFormat}).Return(out, nil)
+		runner = r
+		for _, pm := range []SystemPackageManager{CentosPackageManager{}, ZypperPackageManager{}} {
+			pkgs := pm.BuildInstalledInventory()
+			So(pkgs, ShouldResemble, []InstalledPackage{
+				{Name: "kernel-core", Version: "0:5.14.0-362.8.1.el9_3", Arch: "x86_64"},
+				{Name: "kernel-core", Version: "0:5.14.0-362.24.1.el9_3", Arch: "x86_64"},
+				{Name: "openssl-libs", Version: "1:3.0.7-24.el9", Arch: "x86_64"},
+				{Name: "tzdata", Version: "0:2023c-1.el9", Arch: "noarch"},
+			})
+		}
+	})
+}

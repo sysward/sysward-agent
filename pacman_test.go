@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func withTrackerURL(t *testing.T, url string) {
@@ -58,4 +60,27 @@ func TestPreloadVulnsOK(t *testing.T) {
 	if len(vulns) != 1 || vulns[0].Package[0] != "vim" {
 		t.Errorf("got %+v, want one vim vuln", vulns)
 	}
+}
+
+func TestArchInstalledInventory(t *testing.T) {
+	Convey("pacman -Q output becomes an inventory", t, func() {
+		r := new(MockRunner)
+		r.On("Run", "pacman", []string{"-Q"}).Return("glibc 2.39-1\nlinux 6.8.2.arch1-1\nbad\n", nil)
+		runner = r
+		pkgs := ArchPackageManager{}.BuildInstalledInventory()
+		So(pkgs, ShouldResemble, []InstalledPackage{
+			{Name: "glibc", Version: "2.39-1"},
+			{Name: "linux", Version: "6.8.2.arch1-1"},
+		})
+	})
+}
+
+func TestAgentDataInventoryJSON(t *testing.T) {
+	Convey("installed_inventory is additive and omitted when empty", t, func() {
+		s, _ := AgentData{InstalledInventory: []InstalledPackage{{Name: "a", Version: "1"}}}.ToJson()
+		So(s, ShouldContainSubstring, `"installed_inventory":[{"name":"a","version":"1"}]`)
+		s, _ = AgentData{}.ToJson()
+		So(s, ShouldNotContainSubstring, "installed_inventory")
+		So(s, ShouldContainSubstring, `"installed_packages"`)
+	})
 }
