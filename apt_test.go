@@ -364,3 +364,24 @@ Conf openssl (3.0.2-0ubuntu1.15 Ubuntu:22.04/jammy-security [amd64])
 	}
 	r.Mock.AssertExpectations(t)
 }
+
+func TestDebianInstalledInventory(t *testing.T) {
+	Convey("dpkg-query output becomes an inventory with source and arch", t, func() {
+		out := "bash\t5.1-6ubuntu1.1\tbash\tamd64\tii \n" +
+			"libssl3\t3.0.2-0ubuntu1.15\topenssl\tamd64\tii \n" +
+			"libc6\t2.35-0ubuntu3.8\tglibc\ti386\tii \n" +
+			"oldpkg\t1.0\toldpkg\tamd64\trc \n" +
+			"held\t1:2.0-1\t\tall\thi \n"
+		r := new(MockRunner)
+		r.On("RunBytes", "dpkg-query", []string{"-W", "-f=" + dpkgInventoryFormat}).Return(out, nil)
+		runner = r
+		pkgs := DebianPackageManager{}.BuildInstalledInventory()
+		So(pkgs, ShouldResemble, []InstalledPackage{
+			{Name: "bash", Version: "5.1-6ubuntu1.1", Source: "bash", Arch: "amd64"},
+			{Name: "libssl3", Version: "3.0.2-0ubuntu1.15", Source: "openssl", Arch: "amd64"},
+			{Name: "libc6", Version: "2.35-0ubuntu3.8", Source: "glibc", Arch: "i386"},
+			{Name: "held", Version: "1:2.0-1", Source: "held", Arch: "all"},
+		})
+		r.Mock.AssertExpectations(t)
+	})
+}

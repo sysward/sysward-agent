@@ -49,3 +49,13 @@ type Source struct {
 	Src      bool     `json:"src"`
 	Channels []string `json:"channels"`
 }
+
+// InstalledPackage is one entry of the full installed-package inventory
+// (installed_inventory in the check-in payload). Version uses the same format
+// as OsPackage.InstalledEVR so the server can use it for CVE lookup directly.
+type InstalledPackage struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Source  string `json:"source,omitempty"`
+	Arch    string `json:"arch,omitempty"`
+}

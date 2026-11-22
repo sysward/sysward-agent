@@ -149,6 +149,7 @@ func TestAgentRun(t *testing.T) {
 	pm.On("BuildPackageList").Return([]OsPackage{})
 	pm.On("GetSourcesList").Return([]Source{})
 	pm.On("BuildInstalledPackageList").Return([]string{})
+	pm.On("BuildInstalledInventory").Return([]InstalledPackage{})
 
 	packageManager = pm
 
@@ -178,12 +179,13 @@ UBUNTU_CODENAME=focal
 	fileReader = f
 
 	agentData := AgentData{
-		Packages:          packageManager.BuildPackageList(),
-		SystemUpdates:     packageManager.UpdateCounts(),
-		OperatingSystem:   getOsInformation(),
-		Sources:           packageManager.GetSourcesList(),
-		InstalledPackages: packageManager.BuildInstalledPackageList(),
-		RebootRequired:    true,
+		Packages:           packageManager.BuildPackageList(),
+		SystemUpdates:      packageManager.UpdateCounts(),
+		OperatingSystem:    getOsInformation(),
+		Sources:            packageManager.GetSourcesList(),
+		InstalledPackages:  packageManager.BuildInstalledPackageList(),
+		InstalledInventory: packageManager.BuildInstalledInventory(),
+		RebootRequired:     true,
 	}
 
 	a.On("CheckIn", agentData).Return(errors.New("foo"))

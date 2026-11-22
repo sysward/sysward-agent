@@ -169,12 +169,13 @@ func (a *Agent) Run() {
 	installedPackages := packageManager.BuildInstalledPackageList()
 
 	agentData := AgentData{
-		Packages:          packages,
-		SystemUpdates:     counts,
-		OperatingSystem:   operatingSystem,
-		Sources:           sources,
-		InstalledPackages: installedPackages,
-		RebootRequired:    rebootRequired(),
+		Packages:           packages,
+		SystemUpdates:      counts,
+		OperatingSystem:    operatingSystem,
+		Sources:            sources,
+		InstalledPackages:  installedPackages,
+		InstalledInventory: packageManager.BuildInstalledInventory(),
+		RebootRequired:     rebootRequired(),
 	}
 
 	if len(hostname) > 0 {

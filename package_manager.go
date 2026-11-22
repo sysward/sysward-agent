@@ -8,6 +8,7 @@ type SystemPackageManager interface {
 	GetSourcesList() []Source
 	GetChangelog(string) string
 	BuildInstalledPackageList() []string
+	BuildInstalledInventory() []InstalledPackage
 	UpdatePackageLists() error
 	UpdateCounts() Updates
 }

@@ -185,3 +185,7 @@ func (pm ZypperPackageManager) UpdateCounts() Updates {
 	}
 	return Updates{regular, security}
 }
+
+func (pm ZypperPackageManager) BuildInstalledInventory() []InstalledPackage {
+	return rpmInstalledInventory()
+}
