@@ -149,7 +149,9 @@ func TestAgentRun(t *testing.T) {
 	pm.On("BuildPackageList").Return([]OsPackage{})
 	pm.On("GetSourcesList").Return([]Source{})
 	pm.On("BuildInstalledPackageList").Return([]string{})
-	pm.On("BuildInstalledInventory").Return([]InstalledPackage{})
+	// A first run (no inventory state yet) sends the whole inventory.
+	useTempInventoryState(t)
+	pm.On("BuildInstalledInventory").Return([]InstalledPackage{{Name: "bash", Version: "5.1-6ubuntu1.1", Source: "bash", Arch: "amd64"}})
 
 	packageManager = pm
 

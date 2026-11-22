@@ -167,6 +167,7 @@ func (a *Agent) Run() {
 	sources := packageManager.GetSourcesList()
 
 	installedPackages := packageManager.BuildInstalledPackageList()
+	installedInventory := packageManager.BuildInstalledInventory()
 
 	agentData := AgentData{
 		Packages:           packages,
@@ -174,7 +175,7 @@ func (a *Agent) Run() {
 		OperatingSystem:    operatingSystem,
 		Sources:            sources,
 		InstalledPackages:  installedPackages,
-		InstalledInventory: packageManager.BuildInstalledInventory(),
+		InstalledInventory: inventoryToSend(installedInventory, time.Now(), installingAgent),
 		RebootRequired:     rebootRequired(),
 	}
 
@@ -194,6 +195,7 @@ func (a *Agent) Run() {
 	if err != nil {
 		logging.LogMsg(fmt.Sprintf("[fatal] %s", err))
 	}
+	markInventorySent(agentData.InstalledInventory, time.Now())
 	logging.LogMsg("Agent finished")
 }
 
