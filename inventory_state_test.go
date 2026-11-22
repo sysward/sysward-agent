@@ -90,3 +90,12 @@ func TestInventoryStateProblemsMeanSend(t *testing.T) {
 		t.Errorf("without a state file the inventory is sent")
 	}
 }
+
+// A stalled server must not hang the agent: later cron runs refuse to start
+// while one is still running.
+func TestHttpClientHasATimeout(t *testing.T) {
+	c := GetHttpClient()
+	if c.Timeout != httpTimeout || c.Timeout <= 0 || c.Timeout > 5*time.Minute {
+		t.Fatalf("http client timeout = %s", c.Timeout)
+	}
+}
